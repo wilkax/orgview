@@ -9,7 +9,10 @@ import {
     X,
     ChevronDown,
     LogOut,
-    Key, Files, LucideListTodo,
+    Key,
+    Shield,
+    Building2,
+    Layers,
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
@@ -44,12 +47,41 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
     const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
 
+    // Check if we're on an organization page
+    const orgMatch = pathname.match(/^\/app\/org\/([^\/]+)/);
+    const currentOrgSlug = orgMatch ? orgMatch[1] : null;
+
+    // Build navigation based on user roles
     const navigation = [
         { name: 'Homepage', href: '/app', icon: Home },
-        { name: 'Example Storage', href: '/app/storage', icon: Files },
-        { name: 'Example Table', href: '/app/table', icon: LucideListTodo },
-        { name: 'User Settings', href: '/app/user-settings', icon: User },
     ];
+
+    // Add Organizations and Approaches for system admins
+    if (user?.roles?.isSystemAdmin) {
+        navigation.push({ name: 'Organizations', href: '/app/admin/organizations', icon: Building2 });
+        navigation.push({ name: 'Approaches', href: '/app/admin/approaches', icon: Layers });
+    }
+
+    // Add organization links
+    if (user?.roles?.organizationMemberships && user.roles.organizationMemberships.length > 0) {
+        user.roles.organizationMemberships.forEach((org) => {
+            navigation.push({
+                name: org.organizationSlug,
+                href: `/app/org/${org.organizationSlug}`,
+                icon: Building2,
+            });
+        });
+    }
+
+    // Always add User Settings
+    navigation.push({ name: 'User Settings', href: '/app/user-settings', icon: User });
+
+    // Build organization sub-navigation if on an org page
+    const orgSubNavigation = currentOrgSlug ? [
+        { name: 'Dashboard', href: `/app/org/${currentOrgSlug}` },
+        { name: 'Questionnaires', href: `/app/org/${currentOrgSlug}/questionnaires` },
+        { name: 'Participants', href: `/app/org/${currentOrgSlug}/participants` },
+    ] : [];
 
     const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
@@ -100,6 +132,35 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         );
                     })}
                 </nav>
+
+                {/* Organization Sub-Navigation */}
+                {orgSubNavigation.length > 0 && (
+                    <div className="mt-6 px-2">
+                        <div className="px-2 mb-2">
+                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Organization
+                            </h3>
+                        </div>
+                        <nav className="space-y-1">
+                            {orgSubNavigation.map((item) => {
+                                const isActive = pathname === item.href;
+                                return (
+                                    <Link
+                                        key={item.name}
+                                        href={item.href}
+                                        className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                                            isActive
+                                                ? 'bg-blue-50 text-blue-600'
+                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        }`}
+                                    >
+                                        {item.name}
+                                    </Link>
+                                );
+                            })}
+                        </nav>
+                    </div>
+                )}
 
             </div>
 

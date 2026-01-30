@@ -1,0 +1,175 @@
+import { createSSRClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+
+export default async function ParticipantQuestionnairePage({
+  params,
+}: {
+  params: Promise<{ token: string }>
+}) {
+  const { token } = await params
+  const supabase = await createSSRClient()
+
+  // Validate token
+  const { data: tokenValidation } = await supabase.rpc(
+    'validate_participant_token',
+    {
+      token_value: token,
+    }
+  )
+
+  if (
+    !tokenValidation ||
+    tokenValidation.length === 0 ||
+    !tokenValidation[0].is_valid
+  ) {
+    redirect('/invalid-token')
+  }
+
+  const tokenInfo = tokenValidation[0]
+
+  // Get questionnaire
+  const { data: questionnaire } = await supabase
+    .from('questionnaires')
+    .select('*')
+    .eq('id', tokenInfo.questionnaire_id)
+    .single()
+
+  // Get participant
+  const { data: participant } = await supabase
+    .from('participants')
+    .select('*')
+    .eq('id', tokenInfo.participant_id)
+    .single()
+
+  // Get organization
+  const { data: organization } = await supabase
+    .from('organizations')
+    .select('*')
+    .eq('id', tokenInfo.organization_id)
+    .single()
+
+  // Check for existing response
+  const { data: existingResponse } = await supabase
+    .from('questionnaire_responses')
+    .select('*')
+    .eq('questionnaire_id', tokenInfo.questionnaire_id)
+    .eq('participant_id', tokenInfo.participant_id)
+    .maybeSingle()
+
+  if (!questionnaire || !participant || !organization) {
+    redirect('/invalid-token')
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        {/* Header */}
+        <div className="bg-white shadow rounded-lg p-6 mb-6">
+          <div className="text-sm text-gray-500 mb-2">{organization.name}</div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {questionnaire.title}
+          </h1>
+          {questionnaire.description && (
+            <p className="mt-2 text-gray-600">{questionnaire.description}</p>
+          )}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <p className="text-sm text-gray-500">
+              Participant: <span className="font-medium">{participant.email}</span>
+              {participant.name && ` (${participant.name})`}
+            </p>
+          </div>
+        </div>
+
+        {/* Status Message */}
+        {questionnaire.status !== 'active' && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-yellow-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-yellow-800">
+                  Questionnaire {questionnaire.status}
+                </h3>
+                <p className="mt-1 text-sm text-yellow-700">
+                  This questionnaire is currently {questionnaire.status} and may
+                  not accept responses.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Existing Response Message */}
+        {existingResponse && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-blue-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800">
+                  Response already submitted
+                </h3>
+                <p className="mt-1 text-sm text-blue-700">
+                  You submitted a response on{' '}
+                  {new Date(existingResponse.submitted_at).toLocaleString()}.
+                  You can update your response below.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Questionnaire Form Placeholder */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="text-center py-12">
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              Questionnaire Form
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              The questionnaire form will be rendered here based on the schema.
+            </p>
+            <p className="mt-2 text-xs text-gray-400">
+              Schema: {JSON.stringify(questionnaire.schema).substring(0, 100)}...
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+

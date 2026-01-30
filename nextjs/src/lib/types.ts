@@ -7,8 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
   }
@@ -39,6 +37,300 @@ export type Database = {
   }
   public: {
     Tables: {
+      approach_questionnaire_templates: {
+        Row: {
+          id: string
+          approach_id: string
+          title: string
+          description: string | null
+          schema: Json
+          order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          approach_id: string
+          title: string
+          description?: string | null
+          schema?: Json
+          order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          approach_id?: string
+          title?: string
+          description?: string | null
+          schema?: Json
+          order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      approaches: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          description: string | null
+          category: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          description?: string | null
+          category?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          description?: string | null
+          category?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Relationships: []
+      }
+      organization_approaches: {
+        Row: {
+          id: string
+          organization_id: string
+          approach_id: string
+          assigned_at: string
+          assigned_by: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          approach_id: string
+          assigned_at?: string
+          assigned_by?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          approach_id?: string
+          assigned_at?: string
+          assigned_by?: string | null
+        }
+        Relationships: []
+      }
+      organization_members: {
+        Row: {
+          id: string
+          organization_id: string
+          user_id: string
+          role: Database['public']['Enums']['org_member_role']
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          user_id: string
+          role: Database['public']['Enums']['org_member_role']
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          user_id?: string
+          role?: Database['public']['Enums']['org_member_role']
+          created_at?: string
+          created_by?: string | null
+        }
+        Relationships: []
+      }
+      organizations: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          description: string | null
+          created_at: string
+          updated_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Relationships: []
+      }
+      participant_access_tokens: {
+        Row: {
+          id: string
+          participant_id: string
+          questionnaire_id: string
+          token: string
+          expires_at: string | null
+          used: boolean
+          used_at: string | null
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          participant_id: string
+          questionnaire_id: string
+          token: string
+          expires_at?: string | null
+          used?: boolean
+          used_at?: string | null
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          participant_id?: string
+          questionnaire_id?: string
+          token?: string
+          expires_at?: string | null
+          used?: boolean
+          used_at?: string | null
+          created_at?: string
+          created_by?: string | null
+        }
+        Relationships: []
+      }
+      participants: {
+        Row: {
+          id: string
+          organization_id: string
+          email: string
+          name: string | null
+          metadata: Json
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          email: string
+          name?: string | null
+          metadata?: Json
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          email?: string
+          name?: string | null
+          metadata?: Json
+          created_at?: string
+          created_by?: string | null
+        }
+        Relationships: []
+      }
+      questionnaire_responses: {
+        Row: {
+          id: string
+          questionnaire_id: string
+          participant_id: string
+          answers: Json
+          submitted_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          questionnaire_id: string
+          participant_id: string
+          answers?: Json
+          submitted_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          questionnaire_id?: string
+          participant_id?: string
+          answers?: Json
+          submitted_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      questionnaires: {
+        Row: {
+          id: string
+          organization_id: string
+          title: string
+          description: string | null
+          schema: Json
+          status: Database['public']['Enums']['questionnaire_status']
+          template_id: string | null
+          is_anonymous: boolean
+          start_date: string | null
+          end_date: string | null
+          config: Json
+          created_at: string
+          updated_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          title: string
+          description?: string | null
+          schema?: Json
+          status?: Database['public']['Enums']['questionnaire_status']
+          template_id?: string | null
+          is_anonymous?: boolean
+          start_date?: string | null
+          end_date?: string | null
+          config?: Json
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          title?: string
+          description?: string | null
+          schema?: Json
+          status?: Database['public']['Enums']['questionnaire_status']
+          template_id?: string | null
+          is_anonymous?: boolean
+          start_date?: string | null
+          end_date?: string | null
+          config?: Json
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Relationships: []
+      }
       todo_list: {
         Row: {
           created_at: string
@@ -72,15 +364,89 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          id: string
+          user_id: string
+          role: Database['public']['Enums']['user_role_type']
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          role: Database['public']['Enums']['user_role_type']
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          role?: Database['public']['Enums']['user_role_type']
+          created_at?: string
+          created_by?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_participant_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_participant_id_from_token: {
+        Args: {
+          token_value: string
+        }
+        Returns: string
+      }
+      get_user_org_role: {
+        Args: {
+          org_id: string
+        }
+        Returns: Database['public']['Enums']['org_member_role']
+      }
+      is_org_admin: {
+        Args: {
+          org_id: string
+        }
+        Returns: boolean
+      }
+      is_org_member: {
+        Args: {
+          org_id: string
+        }
+        Returns: boolean
+      }
+      is_system_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      mark_token_used: {
+        Args: {
+          token_value: string
+        }
+        Returns: boolean
+      }
+      validate_participant_token: {
+        Args: {
+          token_value: string
+        }
+        Returns: {
+          is_valid: boolean
+          participant_id: string
+          questionnaire_id: string
+          organization_id: string
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      org_member_role: 'admin' | 'auditor'
+      questionnaire_status: 'draft' | 'active' | 'closed' | 'archived'
+      user_role_type: 'system_admin' | 'org_admin' | 'org_auditor'
     }
     CompositeTypes: {
       [_ in never]: never

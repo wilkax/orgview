@@ -38,17 +38,12 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
                 Go to Dashboard
             </Link>
         ) : (
-            <>
-                <Link href="/auth/login" className="text-gray-600 hover:text-gray-900">
-                    Login
-                </Link>
-                <Link
-                    href="/auth/register"
-                    className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
-                >
-                    Get Started
-                </Link>
-            </>
+            <Link
+                href="/auth/login"
+                className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+            >
+                Login
+            </Link>
         );
     }
 
@@ -64,10 +59,10 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
     ) : (
         <>
             <Link
-                href="/auth/register"
+                href="/auth/login"
                 className="inline-flex items-center px-6 py-3 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
             >
-                Start Building Free
+                Login to Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
             <Link

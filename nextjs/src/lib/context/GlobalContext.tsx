@@ -3,17 +3,19 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
+import { getUserRoles, UserRoleInfo } from '@/lib/auth/roles';
 
 
 type User = {
     email: string;
     id: string;
     registered_at: Date;
+    roles: UserRoleInfo;
 };
 
 interface GlobalContextType {
     loading: boolean;
-    user: User | null;  // Add this
+    user: User | null;
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -31,10 +33,14 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                 // Get user data
                 const { data: { user } } = await client.auth.getUser();
                 if (user) {
+                    // Get user roles
+                    const roles = await getUserRoles(client);
+
                     setUser({
                         email: user.email!,
                         id: user.id,
-                        registered_at: new Date(user.created_at)
+                        registered_at: new Date(user.created_at),
+                        roles
                     });
                 } else {
                     throw new Error('User not found');

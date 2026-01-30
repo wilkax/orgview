@@ -122,14 +122,6 @@ export default function LoginPage() {
             </form>
 
             <SSOButtons onError={setError} />
-
-            <div className="mt-6 text-center text-sm">
-                <span className="text-gray-600">Don&#39;t have an account?</span>
-                {' '}
-                <Link href="/auth/register" className="font-medium text-primary-600 hover:text-primary-500">
-                    Sign up
-                </Link>
-            </div>
         </div>
     );
 }
