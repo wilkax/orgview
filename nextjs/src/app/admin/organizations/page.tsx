@@ -1,5 +1,10 @@
 import { createSSRClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import { Tables } from '@/lib/types'
+
+type OrganizationWithCount = Tables<'organizations'> & {
+  organization_members: { count: number }[]
+}
 
 export default async function OrganizationsPage() {
   const supabase = await createSSRClient()
@@ -11,7 +16,7 @@ export default async function OrganizationsPage() {
       *,
       organization_members (count)
     `)
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: false }) as { data: OrganizationWithCount[] | null }
 
   return (
     <div className="px-4 sm:px-0">
@@ -67,7 +72,7 @@ export default async function OrganizationsPage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {organizations && organizations.length > 0 ? (
-              organizations.map((org: any) => (
+              organizations.map((org) => (
                 <tr key={org.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">

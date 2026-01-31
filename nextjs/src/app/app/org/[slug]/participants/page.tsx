@@ -1,4 +1,5 @@
 import { createSSRClient } from '@/lib/supabase/server'
+import { Tables } from '@/lib/types'
 
 export default async function ParticipantsPage({
   params,
@@ -9,20 +10,24 @@ export default async function ParticipantsPage({
   const supabase = await createSSRClient()
 
   // Get organization
-  const { data: org } = await supabase
+  const { data: orgData } = await supabase
     .from('organizations')
     .select('*')
     .eq('slug', slug)
     .single()
 
-  if (!org) return null
+  if (!orgData) return null
+
+  const org = orgData as Tables<'organizations'>
 
   // Get participants
-  const { data: participants } = await supabase
+  const { data: participantsData } = await supabase
     .from('participants')
     .select('*')
     .eq('organization_id', org.id)
     .order('created_at', { ascending: false })
+
+  const participants = (participantsData || []) as Tables<'participants'>[]
 
   return (
     <div className="px-4 sm:px-0">

@@ -3,11 +3,10 @@
 import { useEffect, useState } from 'react'
 import { createSPASassClient } from '@/lib/supabase/client'
 import { Tables } from '@/lib/types'
-import { Plus, Edit, Trash2, FileText, Layers } from 'lucide-react'
+import { Plus, FileText, Layers } from 'lucide-react'
 import Link from 'next/link'
 
 type Approach = Tables<'approaches'>
-type ApproachTemplate = Tables<'approach_questionnaire_templates'>
 
 export default function ApproachesPage() {
   const [approaches, setApproaches] = useState<Approach[]>([])

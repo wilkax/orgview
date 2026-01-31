@@ -1,16 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createSPASassClient } from '@/lib/supabase/client'
 import { Tables } from '@/lib/types'
-import { Plus, Calendar, Users, Settings } from 'lucide-react'
+import { Plus, Calendar, Users } from 'lucide-react'
 import { useParams } from 'next/navigation'
 
 type Organization = Tables<'organizations'>
 type Questionnaire = Tables<'questionnaires'>
 type Approach = Tables<'approaches'>
 type ApproachTemplate = Tables<'approach_questionnaire_templates'>
-type OrganizationApproach = Tables<'organization_approaches'>
 
 interface ApproachWithTemplates extends Approach {
   templates: ApproachTemplate[]
@@ -34,11 +33,7 @@ export default function QuestionnairesPage() {
     end_date: '',
   })
 
-  useEffect(() => {
-    loadData()
-  }, [slug])
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     const supabaseWrapper = await createSPASassClient()
     const supabase = supabaseWrapper.getSupabaseClient()
 
@@ -101,7 +96,11 @@ export default function QuestionnairesPage() {
     }
 
     setLoading(false)
-  }
+  }, [slug])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   async function createQuestionnaire(e: React.FormEvent) {
     e.preventDefault()

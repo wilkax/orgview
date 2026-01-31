@@ -1,4 +1,5 @@
 import { createSSRClient } from '@/lib/supabase/server'
+import { Tables } from '@/lib/types'
 import Link from 'next/link'
 
 export default async function AdminDashboard() {
@@ -18,11 +19,13 @@ export default async function AdminDashboard() {
   ])
 
   // Get recent organizations
-  const { data: recentOrgs } = await supabase
+  const { data: recentOrgsData } = await supabase
     .from('organizations')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(5)
+
+  const recentOrgs = (recentOrgsData || []) as Tables<'organizations'>[]
 
   return (
     <div className="px-4 sm:px-0">

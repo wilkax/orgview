@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import InviteAdminForm from '@/components/InviteAdminForm'
+import { Tables } from '@/lib/types'
 
 // Disable caching for this page to always show fresh data
 export const dynamic = 'force-dynamic'
@@ -17,15 +18,17 @@ export default async function OrganizationDetailPage({
   const supabase = await createSSRClient()
 
   // Get organization details
-  const { data: org, error } = await supabase
+  const { data: orgData, error } = await supabase
     .from('organizations')
     .select('*')
     .eq('id', id)
     .single()
 
-  if (error || !org) {
-    notFound()
+  if (error || !orgData) {
+    return notFound()
   }
+
+  const org = orgData as Tables<'organizations'>
 
   // Get organization members with user emails
   const adminClient = createAdminClient()
@@ -35,7 +38,11 @@ export default async function OrganizationDetailPage({
     .eq('organization_id', id)
 
   // Fetch user emails for each member
-  const members = membersData ? await Promise.all(
+  type MemberWithUser = Tables<'organization_members'> & {
+    user: { email: string }
+  }
+
+  const members: MemberWithUser[] = membersData ? await Promise.all(
     membersData.map(async (member) => {
       const { data: userData } = await adminClient.auth.admin.getUserById(member.user_id)
       return {
@@ -46,18 +53,22 @@ export default async function OrganizationDetailPage({
   ) : []
 
   // Get questionnaires
-  const { data: questionnaires } = await supabase
+  const { data: questionnairesData } = await supabase
     .from('questionnaires')
     .select('*')
     .eq('organization_id', id)
     .order('created_at', { ascending: false })
 
+  const questionnaires = (questionnairesData || []) as Tables<'questionnaires'>[]
+
   // Get participants
-  const { data: participants } = await supabase
+  const { data: participantsData } = await supabase
     .from('participants')
     .select('*')
     .eq('organization_id', id)
     .order('created_at', { ascending: false })
+
+  const participants = (participantsData || []) as Tables<'participants'>[]
 
   return (
     <div className="px-4 sm:px-0">
@@ -118,7 +129,7 @@ export default async function OrganizationDetailPage({
         </div>
         <ul className="divide-y divide-gray-200">
           {members && members.length > 0 ? (
-            members.map((member: any) => (
+            members.map((member) => (
               <li key={member.id} className="px-4 py-4 sm:px-6">
                 <div className="flex items-center justify-between">
                   <div>

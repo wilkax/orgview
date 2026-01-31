@@ -1,4 +1,5 @@
 import { createSSRClient } from '@/lib/supabase/server'
+import { Tables } from '@/lib/types'
 import { redirect } from 'next/navigation'
 
 export default async function ParticipantQuestionnairePage({
@@ -10,7 +11,8 @@ export default async function ParticipantQuestionnairePage({
   const supabase = await createSSRClient()
 
   // Validate token
-  const { data: tokenValidation } = await supabase.rpc(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: tokenValidation } = await (supabase as any).rpc(
     'validate_participant_token',
     {
       token_value: token,
@@ -28,33 +30,53 @@ export default async function ParticipantQuestionnairePage({
   const tokenInfo = tokenValidation[0]
 
   // Get questionnaire
-  const { data: questionnaire } = await supabase
+  const { data: questionnaireData } = await supabase
     .from('questionnaires')
     .select('*')
     .eq('id', tokenInfo.questionnaire_id)
     .single()
 
+  if (!questionnaireData) {
+    redirect('/invalid-token')
+  }
+
+  const questionnaire = questionnaireData as Tables<'questionnaires'>
+
   // Get participant
-  const { data: participant } = await supabase
+  const { data: participantData } = await supabase
     .from('participants')
     .select('*')
     .eq('id', tokenInfo.participant_id)
     .single()
 
+  if (!participantData) {
+    redirect('/invalid-token')
+  }
+
+  const participant = participantData as Tables<'participants'>
+
   // Get organization
-  const { data: organization } = await supabase
+  const { data: organizationData } = await supabase
     .from('organizations')
     .select('*')
     .eq('id', tokenInfo.organization_id)
     .single()
 
+  if (!organizationData) {
+    redirect('/invalid-token')
+  }
+
+  const organization = organizationData as Tables<'organizations'>
+
   // Check for existing response
-  const { data: existingResponse } = await supabase
+  const { data: existingResponseData } = await supabase
     .from('questionnaire_responses')
     .select('*')
     .eq('questionnaire_id', tokenInfo.questionnaire_id)
     .eq('participant_id', tokenInfo.participant_id)
     .maybeSingle()
+
+  const existingResponse = existingResponseData ? (existingResponseData as Tables<'questionnaire_responses'>) : null
 
   if (!questionnaire || !participant || !organization) {
     redirect('/invalid-token')

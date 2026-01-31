@@ -1,4 +1,5 @@
 import { createSSRClient } from '@/lib/supabase/server'
+import { Tables } from '@/lib/types'
 import Link from 'next/link'
 import InviteAuditorForm from '@/components/InviteAuditorForm'
 import { isOrgAdmin } from '@/lib/auth/roles'
@@ -12,24 +13,27 @@ export default async function OrgDashboard({
   const supabase = await createSSRClient()
 
   // Get organization
-  const { data: org } = await supabase
+  const { data: orgData } = await supabase
     .from('organizations')
     .select('*')
     .eq('slug', slug)
     .single()
 
-  if (!org) return null
+  if (!orgData) return null
+
+  const org = orgData as Tables<'organizations'>
 
   // Check if user is org admin
   const userIsOrgAdmin = await isOrgAdmin(supabase, org.id)
 
   // First, get questionnaire IDs for this organization
-  const { data: questionnaires } = await supabase
+  const { data: questionnairesData } = await supabase
     .from('questionnaires')
     .select('id')
     .eq('organization_id', org.id)
-  
-  const questionnaireIds = questionnaires?.map(q => q.id) || []
+
+  const questionnaires = (questionnairesData || []) as { id: string }[]
+  const questionnaireIds = questionnaires.map(q => q.id)
 
   // Get statistics
   const [
@@ -59,12 +63,14 @@ export default async function OrgDashboard({
   ])
 
   // Get recent questionnaires
-  const { data: recentQuestionnaires } = await supabase
+  const { data: recentQuestionnairesData } = await supabase
     .from('questionnaires')
     .select('*')
     .eq('organization_id', org.id)
     .order('created_at', { ascending: false })
     .limit(5)
+
+  const recentQuestionnaires = (recentQuestionnairesData || []) as Tables<'questionnaires'>[]
 
   return (
     <div className="px-4 sm:px-0">

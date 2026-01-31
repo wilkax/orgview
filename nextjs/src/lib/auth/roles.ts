@@ -41,7 +41,7 @@ export async function getUserRoles(
   const isSystemAdmin = !!systemAdminRole
 
   // Get organization memberships
-  const { data: memberships } = await supabase
+  const { data: membershipsData } = await supabase
     .from('organization_members')
     .select(
       `
@@ -54,12 +54,20 @@ export async function getUserRoles(
     )
     .eq('user_id', user.id)
 
+  type MembershipWithOrg = {
+    organization_id: string
+    role: OrgMemberRole
+    organizations: { slug: string } | null
+  }
+
+  const memberships = (membershipsData || []) as unknown as MembershipWithOrg[]
+
   const organizationMemberships =
-    memberships?.map((m: any) => ({
+    memberships.map((m: MembershipWithOrg) => ({
       organizationId: m.organization_id,
       organizationSlug: m.organizations?.slug || '',
       role: m.role as OrgMemberRole,
-    })) || []
+    }))
 
   return {
     isSystemAdmin,
@@ -71,7 +79,8 @@ export async function getUserRoles(
  * Check if the current user is a system admin
  */
 export async function isSystemAdmin(
-  supabase: SupabaseClient<Database>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any
 ): Promise<boolean> {
   const { data } = await supabase.rpc('is_system_admin')
   return data || false
@@ -81,7 +90,8 @@ export async function isSystemAdmin(
  * Check if the current user is an admin of a specific organization
  */
 export async function isOrgAdmin(
-  supabase: SupabaseClient<Database>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
   orgId: string
 ): Promise<boolean> {
   const { data } = await supabase.rpc('is_org_admin', { org_id: orgId })
@@ -92,7 +102,8 @@ export async function isOrgAdmin(
  * Check if the current user is a member (admin or auditor) of a specific organization
  */
 export async function isOrgMember(
-  supabase: SupabaseClient<Database>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
   orgId: string
 ): Promise<boolean> {
   const { data } = await supabase.rpc('is_org_member', { org_id: orgId })
@@ -103,7 +114,8 @@ export async function isOrgMember(
  * Get the user's role in a specific organization
  */
 export async function getUserOrgRole(
-  supabase: SupabaseClient<Database>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
   orgId: string
 ): Promise<OrgMemberRole | null> {
   const { data } = await supabase.rpc('get_user_org_role', { org_id: orgId })

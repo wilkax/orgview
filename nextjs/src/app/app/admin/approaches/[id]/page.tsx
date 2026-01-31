@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createSPASassClient } from '@/lib/supabase/client'
 import { Tables } from '@/lib/types'
-import { Plus, ArrowLeft, Edit, Trash2 } from 'lucide-react'
+import { Plus, ArrowLeft, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
@@ -24,11 +24,7 @@ export default function ApproachDetailPage() {
     order: 0,
   })
 
-  useEffect(() => {
-    loadData()
-  }, [id])
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     const supabaseWrapper = await createSPASassClient()
     const supabase = supabaseWrapper.getSupabaseClient()
 
@@ -55,7 +51,11 @@ export default function ApproachDetailPage() {
     }
 
     setLoading(false)
-  }
+  }, [id])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   async function createTemplate(e: React.FormEvent) {
     e.preventDefault()

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createSPASassClient } from '@/lib/supabase/client'
 import { Tables } from '@/lib/types'
 import { Plus, X, Layers } from 'lucide-react'
@@ -18,11 +18,7 @@ export default function OrganizationApproaches({ organizationId }: OrganizationA
   const [loading, setLoading] = useState(true)
   const [showAssignModal, setShowAssignModal] = useState(false)
 
-  useEffect(() => {
-    loadData()
-  }, [organizationId])
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     const supabaseWrapper = await createSPASassClient()
     const supabase = supabaseWrapper.getSupabaseClient()
 
@@ -48,7 +44,11 @@ export default function OrganizationApproaches({ organizationId }: OrganizationA
     }
 
     setLoading(false)
-  }
+  }, [organizationId])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   async function assignApproach(approachId: string) {
     const supabaseWrapper = await createSPASassClient()

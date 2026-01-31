@@ -1,5 +1,5 @@
 import { createSSRClient } from '@/lib/supabase/server'
-import Link from 'next/link'
+import { Tables } from '@/lib/types'
 
 export default async function QuestionnairesPage({
   params,
@@ -10,20 +10,24 @@ export default async function QuestionnairesPage({
   const supabase = await createSSRClient()
 
   // Get organization
-  const { data: org } = await supabase
+  const { data: orgData } = await supabase
     .from('organizations')
     .select('*')
     .eq('slug', slug)
     .single()
 
-  if (!org) return null
+  if (!orgData) return null
+
+  const org = orgData as Tables<'organizations'>
 
   // Get questionnaires
-  const { data: questionnaires } = await supabase
+  const { data: questionnairesData } = await supabase
     .from('questionnaires')
     .select('*')
     .eq('organization_id', org.id)
     .order('created_at', { ascending: false })
+
+  const questionnaires = (questionnairesData || []) as Tables<'questionnaires'>[]
 
   return (
     <div className="px-4 sm:px-0">

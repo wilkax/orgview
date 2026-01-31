@@ -4,10 +4,15 @@ import { useState, useEffect } from 'react'
 import { createSPASassClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
+import { Tables } from '@/lib/types'
+
+type OrganizationWithCount = Tables<'organizations'> & {
+  memberCount: number
+}
 
 export default function OrganizationsPage() {
-  const [organizations, setOrganizations] = useState<any[]>([])
-  const [filteredOrgs, setFilteredOrgs] = useState<any[]>([])
+  const [organizations, setOrganizations] = useState<OrganizationWithCount[]>([])
+  const [filteredOrgs, setFilteredOrgs] = useState<OrganizationWithCount[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -37,14 +42,26 @@ export default function OrganizationsPage() {
 
       const { data } = await supabase
         .from('organizations')
-        .select(`
-          *,
-          organization_members (count)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
 
-      setOrganizations(data || [])
-      setFilteredOrgs(data || [])
+      // Get member counts for each organization
+      const orgsWithCounts: OrganizationWithCount[] = await Promise.all(
+        (data || []).map(async (org) => {
+          const { count } = await supabase
+            .from('organization_members')
+            .select('*', { count: 'exact', head: true })
+            .eq('organization_id', org.id)
+
+          return {
+            ...org,
+            memberCount: count || 0
+          }
+        })
+      )
+
+      setOrganizations(orgsWithCounts)
+      setFilteredOrgs(orgsWithCounts)
     } catch (error) {
       console.error('Error loading organizations:', error)
     } finally {
@@ -132,7 +149,7 @@ export default function OrganizationsPage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredOrgs && filteredOrgs.length > 0 ? (
-              filteredOrgs.map((org: any) => (
+              filteredOrgs.map((org) => (
                 <tr key={org.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
@@ -149,7 +166,7 @@ export default function OrganizationsPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {org.organization_members?.[0]?.count || 0}
+                      {org.memberCount}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

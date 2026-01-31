@@ -2,7 +2,7 @@
 import React from 'react';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { CalendarDays, Settings, Shield, Building2 } from 'lucide-react';
+import { CalendarDays, Settings, Building2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DashboardContent() {
@@ -100,7 +100,7 @@ export default function DashboardContent() {
                      (!user?.roles?.organizationMemberships || user.roles.organizationMemberships.length === 0) && (
                         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                             <p className="text-sm text-blue-800">
-                                You don't have any organization memberships yet. Contact your system administrator to get access to organizations.
+                                You don&apos;t have any organization memberships yet. Contact your system administrator to get access to organizations.
                             </p>
                         </div>
                     )}

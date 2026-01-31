@@ -66,16 +66,18 @@ export async function updateSession(request: NextRequest) {
             const orgSlug = orgMatch[1]
 
             // Get organization by slug
-            const { data: org } = await supabase
+            const { data: orgData } = await supabase
                 .from('organizations')
                 .select('id')
                 .eq('slug', orgSlug)
                 .single()
 
-            if (org) {
+            if (orgData) {
+                const org = orgData as { id: string }
                 // Check if user is system admin or org member
                 const { data: isSystemAdmin } = await supabase.rpc('is_system_admin')
-                const { data: isOrgMember } = await supabase.rpc('is_org_member', { org_id: org.id })
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const { data: isOrgMember } = await (supabase as any).rpc('is_org_member', { org_id: org.id })
 
                 if (!isSystemAdmin && !isOrgMember) {
                     const url = request.nextUrl.clone()
@@ -92,7 +94,8 @@ export async function updateSession(request: NextRequest) {
         const token = participantMatch[1]
 
         // Validate token
-        const { data: tokenValidation } = await supabase.rpc('validate_participant_token', {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: tokenValidation } = await (supabase as any).rpc('validate_participant_token', {
             token_value: token
         })
 

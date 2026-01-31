@@ -1,4 +1,4 @@
-import { Database } from '@/lib/types'
+import { Database, Json } from '@/lib/types'
 import { SupabaseClient } from '@supabase/supabase-js'
 
 export interface ParticipantTokenInfo {
@@ -121,7 +121,7 @@ export async function getQuestionnaireByToken(
 export async function submitQuestionnaireResponse(
   supabase: SupabaseClient<Database>,
   token: string,
-  answers: Record<string, any>
+  answers: Json
 ) {
   const tokenInfo = await validateParticipantToken(supabase, token)
 

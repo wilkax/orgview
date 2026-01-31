@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createSSRClient } from '@/lib/supabase/server'
+import { Tables } from '@/lib/types'
 import Link from 'next/link'
 
 export default async function OrgLayout({
@@ -22,19 +23,22 @@ export default async function OrgLayout({
   }
 
   // Get organization by slug
-  const { data: org, error } = await supabase
+  const { data: orgData, error } = await supabase
     .from('organizations')
     .select('*')
     .eq('slug', slug)
     .single()
 
-  if (error || !org) {
+  if (error || !orgData) {
     redirect('/app')
   }
 
+  const org = orgData as Tables<'organizations'>
+
   // Check if user has access (system admin or org member)
   const { data: isSystemAdmin } = await supabase.rpc('is_system_admin')
-  const { data: isOrgMember } = await supabase.rpc('is_org_member', {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: isOrgMember } = await (supabase as any).rpc('is_org_member', {
     org_id: org.id,
   })
 
@@ -43,7 +47,8 @@ export default async function OrgLayout({
   }
 
   // Get user's role in the organization
-  const { data: userRole } = await supabase.rpc('get_user_org_role', {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: userRole } = await (supabase as any).rpc('get_user_org_role', {
     org_id: org.id,
   })
 
