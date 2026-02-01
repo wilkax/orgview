@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createSPASassClient } from '@/lib/supabase/client'
 import { Tables } from '@/lib/types'
-import { ArrowLeft, Calendar, Users, Settings, Eye } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
@@ -41,11 +41,7 @@ export default function QuestionnaireDetailPage() {
   const [organization, setOrganization] = useState<Organization | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadData()
-  }, [id, slug])
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     const supabaseWrapper = await createSPASassClient()
     const supabase = supabaseWrapper.getSupabaseClient()
 
@@ -72,9 +68,13 @@ export default function QuestionnaireDetailPage() {
     }
 
     setLoading(false)
-  }
+  }, [id, slug])
 
-  async function updateStatus(newStatus: string) {
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  async function updateStatus(newStatus: 'draft' | 'active' | 'closed' | 'archived') {
     const supabaseWrapper = await createSPASassClient()
     const supabase = supabaseWrapper.getSupabaseClient()
 
@@ -96,7 +96,20 @@ export default function QuestionnaireDetailPage() {
     return <div className="p-6">Questionnaire not found</div>
   }
 
-  const schema = questionnaire.schema as QuestionnaireSchema
+  // Type guard: check if schema has the expected structure
+  const schemaData = questionnaire.schema
+  let schema: QuestionnaireSchema = { sections: [] }
+
+  if (
+    schemaData &&
+    typeof schemaData === 'object' &&
+    !Array.isArray(schemaData) &&
+    'sections' in schemaData &&
+    Array.isArray(schemaData.sections)
+  ) {
+    schema = schemaData as unknown as QuestionnaireSchema
+  }
+
   const totalQuestions = schema.sections?.reduce((sum, section) => sum + (section.questions?.length || 0), 0) || 0
 
   return (

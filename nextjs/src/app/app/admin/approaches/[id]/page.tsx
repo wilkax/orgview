@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createSPASassClient } from '@/lib/supabase/client'
 import { Tables } from '@/lib/types'
 import { Plus, ArrowLeft, Trash2, FileText, BarChart3, Edit2 } from 'lucide-react'
@@ -35,11 +35,7 @@ export default function ApproachDetailPage() {
     order: 0,
   })
 
-  useEffect(() => {
-    loadData()
-  }, [id])
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     const supabaseWrapper = await createSPASassClient()
     const supabase = supabaseWrapper.getSupabaseClient()
 
@@ -74,7 +70,11 @@ export default function ApproachDetailPage() {
     }
 
     setLoading(false)
-  }
+  }, [id])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   async function createOrUpdateQuestionnaire(e: React.FormEvent) {
     e.preventDefault()

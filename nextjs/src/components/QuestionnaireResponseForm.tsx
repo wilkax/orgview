@@ -36,7 +36,7 @@ interface QuestionnaireSchema {
 }
 
 interface Answers {
-  [questionId: string]: any
+  [questionId: string]: number | string | string[] | undefined
 }
 
 interface Props {
@@ -45,25 +45,37 @@ interface Props {
   existingResponse: QuestionnaireResponse | null
 }
 
-export default function QuestionnaireResponseForm({ 
-  questionnaire, 
-  participant, 
-  existingResponse 
+export default function QuestionnaireResponseForm({
+  questionnaire,
+  participant,
+  existingResponse
 }: Props) {
   const [answers, setAnswers] = useState<Answers>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(!!existingResponse)
   const [error, setError] = useState<string | null>(null)
 
-  const schema = questionnaire.schema as QuestionnaireSchema
+  // Type guard: check if schema has the expected structure
+  const schemaData = questionnaire.schema
+  let schema: QuestionnaireSchema = { sections: [] }
+
+  if (
+    schemaData &&
+    typeof schemaData === 'object' &&
+    !Array.isArray(schemaData) &&
+    'sections' in schemaData &&
+    Array.isArray(schemaData.sections)
+  ) {
+    schema = schemaData as unknown as QuestionnaireSchema
+  }
 
   useEffect(() => {
     if (existingResponse && existingResponse.answers) {
-      setAnswers(existingResponse.answers as Answers)
+      setAnswers(existingResponse.answers as unknown as Answers)
     }
   }, [existingResponse])
 
-  function handleAnswerChange(questionId: string, value: any) {
+  function handleAnswerChange(questionId: string, value: number | string | string[]) {
     setAnswers(prev => ({
       ...prev,
       [questionId]: value

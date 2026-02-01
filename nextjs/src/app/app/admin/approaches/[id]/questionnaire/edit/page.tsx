@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createSPASassClient } from '@/lib/supabase/client'
-import { Tables } from '@/lib/types'
+import { Tables, Json } from '@/lib/types'
 import { ArrowLeft, Plus, Trash2, GripVertical, Save } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
@@ -45,11 +45,7 @@ export default function QuestionnaireEditorPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    loadData()
-  }, [approachId])
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     const supabaseWrapper = await createSPASassClient()
     const supabase = supabaseWrapper.getSupabaseClient()
 
@@ -61,11 +57,27 @@ export default function QuestionnaireEditorPage() {
 
     if (data) {
       setQuestionnaire(data)
-      setSchema((data.schema as QuestionnaireSchema) || { sections: [] })
+      // Type guard: check if schema has the expected structure
+      const schemaData = data.schema
+      if (
+        schemaData &&
+        typeof schemaData === 'object' &&
+        !Array.isArray(schemaData) &&
+        'sections' in schemaData &&
+        Array.isArray(schemaData.sections)
+      ) {
+        setSchema(schemaData as unknown as QuestionnaireSchema)
+      } else {
+        setSchema({ sections: [] })
+      }
     }
 
     setLoading(false)
-  }
+  }, [approachId])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   async function saveQuestionnaire() {
     if (!questionnaire) return
@@ -76,7 +88,7 @@ export default function QuestionnaireEditorPage() {
 
     const { error } = await supabase
       .from('approach_questionnaires')
-      .update({ schema: schema })
+      .update({ schema: schema as unknown as Json })
       .eq('id', questionnaire.id)
 
     setSaving(false)
@@ -134,7 +146,7 @@ export default function QuestionnaireEditorPage() {
     setSchema({ ...schema, sections: newSections })
   }
 
-  function updateQuestion(sectionIndex: number, questionIndex: number, field: string, value: any) {
+  function updateQuestion(sectionIndex: number, questionIndex: number, field: string, value: string | number | boolean | string[]) {
     const newSections = [...schema.sections]
     if (field.startsWith('scale.')) {
       const scaleField = field.split('.')[1]
