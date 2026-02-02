@@ -43,12 +43,14 @@ interface Props {
   questionnaire: Questionnaire
   participant: Participant
   existingResponse: QuestionnaireResponse | null
+  isWithinTimeFrame?: boolean
 }
 
 export default function QuestionnaireResponseForm({
   questionnaire,
   participant,
-  existingResponse
+  existingResponse,
+  isWithinTimeFrame = true
 }: Props) {
   const [answers, setAnswers] = useState<Answers>({})
   const [submitting, setSubmitting] = useState(false)
@@ -370,9 +372,16 @@ export default function QuestionnaireResponseForm({
 
       {/* Submit Button */}
       <div className="bg-white shadow rounded-lg p-6">
+        {!isWithinTimeFrame && (
+          <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
+            <p className="text-sm text-gray-600">
+              This questionnaire is not currently accepting responses due to time restrictions.
+            </p>
+          </div>
+        )}
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || !isWithinTimeFrame}
           className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {submitting ? 'Submitting...' : existingResponse ? 'Update Response' : 'Submit Response'}
