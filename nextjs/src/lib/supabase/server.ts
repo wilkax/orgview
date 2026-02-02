@@ -38,3 +38,20 @@ export async function createSSRSassClient() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new SassClient(client as any, ClientType.SERVER);
 }
+
+/**
+ * Creates a Supabase client with service role key for server-side operations
+ * This bypasses Row Level Security and should only be used in trusted server contexts
+ */
+export function createServiceRoleClient() {
+    return createServerClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.PRIVATE_SUPABASE_SERVICE_KEY!,
+        {
+            cookies: {
+                getAll() { return [] },
+                setAll() { }
+            }
+        }
+    )
+}

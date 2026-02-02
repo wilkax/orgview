@@ -1,28 +1,29 @@
 /**
- * LalouFlower - Custom D3.js visualization for Laloux organizational model
- * 
+ * LalouxFlower - Custom D3.js visualization for Laloux organizational model
+ *
  * Displays 6 dimensions as petals in a flower pattern
  */
 
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import * as d3 from 'd3';
 import { ComputedReportData, ConfigOptions } from '@/lib/reports/types';
 
-interface LalouFlowerProps {
+interface LalouxFlowerProps {
   data: ComputedReportData;
   options: ConfigOptions;
 }
 
-export function LalouFlower({ data, options }: LalouFlowerProps) {
+export function LalouxFlower({ data, options }: LalouxFlowerProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const dimensions = (options.dimensions || []) as string[];
-  const width = (options.width || 600) as number;
-  const height = (options.height || 600) as number;
-  const colors = (options.colors || ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']) as string[];
-  const showLabels = (options.showLabels !== undefined ? options.showLabels : true) as boolean;
-  const showValues = (options.showValues !== undefined ? options.showValues : true) as boolean;
+
+  const dimensions = useMemo(() => (options.dimensions || []) as string[], [options.dimensions]);
+  const width = useMemo(() => (options.width || 600) as number, [options.width]);
+  const height = useMemo(() => (options.height || 600) as number, [options.height]);
+  const colors = useMemo(() => (options.colors || ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']) as string[], [options.colors]);
+  const showLabels = useMemo(() => (options.showLabels !== undefined ? options.showLabels : true) as boolean, [options.showLabels]);
+  const showValues = useMemo(() => (options.showValues !== undefined ? options.showValues : true) as boolean, [options.showValues]);
 
   useEffect(() => {
     if (!svgRef.current || !data.dimensions) return;
@@ -166,7 +167,7 @@ export function LalouFlower({ data, options }: LalouFlowerProps) {
         ref={svgRef}
         width={width}
         height={height}
-        className="lalou-flower"
+        className="laloux-flower"
       />
     </div>
   );

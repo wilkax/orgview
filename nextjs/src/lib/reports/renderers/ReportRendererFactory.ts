@@ -8,10 +8,10 @@ import { ReportRenderer, ReportType } from '../types';
 import { VisualizationRenderer } from './VisualizationRenderer';
 import { PDFRenderer } from './PDFRenderer';
 import { DashboardRenderer } from './DashboardRenderer';
-import { LalouFlower } from '@/components/reports/visualizations/LalouFlower';
+import { LalouxFlower } from '@/components/reports/visualizations/LalouxFlower';
 
 // Register custom visualizations
-VisualizationRenderer.registerCustomVisualization('flower', LalouFlower);
+VisualizationRenderer.registerCustomVisualization('flower', LalouxFlower);
 
 export class ReportRendererFactory {
   private static renderers: Map<ReportType, ReportRenderer> = new Map();

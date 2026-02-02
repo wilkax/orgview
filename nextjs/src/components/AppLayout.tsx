@@ -79,6 +79,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const orgSubNavigation = currentOrgSlug ? [
         { name: 'Dashboard', href: `/app/org/${currentOrgSlug}` },
         { name: 'Questionnaires', href: `/app/org/${currentOrgSlug}/questionnaires` },
+        { name: 'Analytics', href: `/app/org/${currentOrgSlug}/analytics` },
         { name: 'Participants', href: `/app/org/${currentOrgSlug}/participants` },
     ] : [];
 
@@ -142,7 +143,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         </div>
                         <nav className="space-y-1">
                             {orgSubNavigation.map((item) => {
-                                const isActive = pathname === item.href;
+                                // Check if current path starts with the item href (for nested routes)
+                                // or matches exactly (for root routes like dashboard)
+                                const isActive = item.href === `/app/org/${currentOrgSlug}`
+                                    ? pathname === item.href
+                                    : pathname.startsWith(item.href);
                                 return (
                                     <Link
                                         key={item.name}

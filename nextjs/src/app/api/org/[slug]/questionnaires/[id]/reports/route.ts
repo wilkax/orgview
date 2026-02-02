@@ -43,18 +43,6 @@ export async function GET(
 
     const orgId = (org as { id: string }).id;
 
-    // Check if user is org member
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: isMember } = await (supabase as any)
-      .rpc('is_org_member', { org_id: orgId });
-
-    if (!isMember) {
-      return NextResponse.json(
-        { error: 'Forbidden: Organization membership required' },
-        { status: 403 }
-      );
-    }
-
     // Fetch questionnaire
     const { data: questionnaire, error: qError } = await supabase
       .from('questionnaires')

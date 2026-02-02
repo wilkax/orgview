@@ -194,14 +194,164 @@ export class DashboardRenderer extends BaseRenderer {
    * Renders a single widget
    */
   private renderWidget(data: ComputedReportData, widget: DashboardWidget): ReactNode {
-    // Widget rendering logic based on widget type
     const title = widget.options.title as string | undefined;
+
+    switch (widget.type) {
+      case 'metric':
+        return this.renderMetricWidget(data, widget, title);
+      case 'chart':
+        return this.renderChartWidget(data, widget, title);
+      case 'table':
+        return this.renderTableWidget(data, widget, title);
+      default:
+        return (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {title || 'Widget'}
+            </h3>
+            <p className="text-gray-600">Unknown widget type: {widget.type}</p>
+          </div>
+        );
+    }
+  }
+
+  /**
+   * Renders a metric widget (single value card)
+   */
+  private renderMetricWidget(data: ComputedReportData, widget: DashboardWidget, title?: string): ReactNode {
+    const dimensionData = data.dimensions[widget.dataSource];
+
+    if (!dimensionData) {
+      return (
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-sm font-medium text-gray-500 mb-2">{title || widget.dataSource}</h3>
+          <p className="text-gray-400">No data available</p>
+        </div>
+      );
+    }
+
+    const value = dimensionData.value || 0;
+    const scale = dimensionData.scale || { min: 1, max: 5 };
+    const percentage = ((value - scale.min) / (scale.max - scale.min)) * 100;
+
     return (
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          {title || 'Widget'}
-        </h3>
-        <p className="text-gray-600">Widget content</p>
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h3 className="text-sm font-medium text-gray-500 mb-2">{title || widget.dataSource}</h3>
+        <div className="flex items-baseline">
+          <p className="text-3xl font-bold text-gray-900">{value.toFixed(2)}</p>
+          <p className="ml-2 text-sm text-gray-500">/ {scale.max}</p>
+        </div>
+        <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
+          <div
+            className="bg-blue-600 h-2 rounded-full transition-all"
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+        <p className="mt-2 text-xs text-gray-500">{dimensionData.responses || 0} responses</p>
+      </div>
+    );
+  }
+
+  /**
+   * Renders a chart widget
+   */
+  private renderChartWidget(data: ComputedReportData, widget: DashboardWidget, title?: string): ReactNode {
+    const dimensions = Object.entries(data.dimensions);
+
+    if (dimensions.length === 0) {
+      return (
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{title || 'Chart'}</h3>
+          <p className="text-gray-400">No data available</p>
+        </div>
+      );
+    }
+
+    const maxValue = Math.max(...dimensions.map(([, d]) => d.value || 0));
+    const scale = dimensions[0]?.[1]?.scale || { min: 1, max: 5 };
+
+    return (
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title || 'Dimension Scores'}</h3>
+        <div className="space-y-4">
+          {dimensions.map(([key, dimension]) => {
+            const value = dimension.value || 0;
+            const percentage = ((value - scale.min) / (scale.max - scale.min)) * 100;
+
+            return (
+              <div key={key}>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm font-medium text-gray-700 capitalize">
+                    {key.replace(/-/g, ' ')}
+                  </span>
+                  <span className="text-sm font-bold text-gray-900">{value.toFixed(2)}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div
+                    className="bg-blue-600 h-3 rounded-full transition-all"
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  /**
+   * Renders a table widget
+   */
+  private renderTableWidget(data: ComputedReportData, widget: DashboardWidget, title?: string): ReactNode {
+    const dimensions = Object.entries(data.dimensions);
+
+    return (
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title || 'Summary'}</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                  Dimension
+                </th>
+                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                  Score
+                </th>
+                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                  Responses
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {dimensions.map(([key, dimension]) => (
+                <tr key={key}>
+                  <td className="px-3 py-2 text-sm text-gray-900 capitalize">
+                    {key.replace(/-/g, ' ')}
+                  </td>
+                  <td className="px-3 py-2 text-sm text-gray-900 text-right font-medium">
+                    {(dimension.value || 0).toFixed(2)}
+                  </td>
+                  <td className="px-3 py-2 text-sm text-gray-500 text-right">
+                    {dimension.responses || 0}
+                  </td>
+                </tr>
+              ))}
+              <tr className="bg-gray-50">
+                <td className="px-3 py-2 text-sm font-bold text-gray-900">
+                  Overall
+                </td>
+                <td className="px-3 py-2 text-sm font-bold text-gray-900 text-right">
+                  {(data.overall_score || 0).toFixed(2)}
+                </td>
+                <td className="px-3 py-2 text-sm text-gray-500 text-right">
+                  {data.response_count || 0}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }

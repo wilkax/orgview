@@ -43,18 +43,6 @@ export async function POST(
 
     const orgId = (org as { id: string }).id;
 
-    // Check if user is org admin
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: isAdmin } = await (supabase as any)
-      .rpc('is_org_admin', { org_id: orgId });
-
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
-        { status: 403 }
-      );
-    }
-
     // Parse request body
     const body: GenerateReportRequest = await request.json();
     const { questionnaireId, templateId, force = false } = body;

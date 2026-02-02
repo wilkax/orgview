@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createSPASassClient } from '@/lib/supabase/client'
 import { Tables } from '@/lib/types'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, BarChart3 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
@@ -242,7 +242,7 @@ export default function QuestionnaireDetailPage() {
       {/* Actions */}
       <div className="bg-white shadow rounded-lg p-6">
         <h2 className="text-lg font-medium text-gray-900 mb-4">Actions</h2>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           {questionnaire.status === 'draft' && (
             <button
               onClick={() => updateStatus('active')}
@@ -267,6 +267,13 @@ export default function QuestionnaireDetailPage() {
               Archive
             </button>
           )}
+          <Link
+            href={`/app/org/${slug}/questionnaires/${id}/reports`}
+            className="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700"
+          >
+            <BarChart3 className="h-4 w-4" />
+            View Reports
+          </Link>
         </div>
       </div>
     </div>

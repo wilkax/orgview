@@ -42,15 +42,6 @@ export default async function ReportPage({ params }: PageProps) {
   const orgId = (org as { id: string; name: string }).id;
   const orgName = (org as { id: string; name: string }).name;
 
-  // Check if user is org member
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: isMember } = await (supabase as any)
-    .rpc('is_org_member', { org_id: orgId });
-
-  if (!isMember) {
-    redirect('/app');
-  }
-
   // Fetch report with related data
   const { data: report, error: reportError } = await supabase
     .from('organization_reports')

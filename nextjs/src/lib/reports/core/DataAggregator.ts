@@ -1,11 +1,11 @@
 /**
  * DataAggregator - Aggregates questionnaire responses into computed report data
- * 
+ *
  * This service orchestrates the aggregation of questionnaire responses
  * according to the report template configuration.
  */
 
-import { createSSRClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 import {
   IDataAggregator,
   ReportTemplateConfig,
@@ -51,7 +51,8 @@ export class DataAggregator implements IDataAggregator {
     questionnaireId: string,
     config: ReportTemplateConfig
   ): Promise<ComputedReportData> {
-    const supabase = await createSSRClient();
+    // Use service role client to bypass RLS for server-side data aggregation
+    const supabase = createServiceRoleClient();
 
     // Fetch questionnaire schema
     const { data: questionnaire, error: qError } = await supabase

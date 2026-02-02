@@ -1,11 +1,11 @@
 /**
  * ReportGenerator - Main service for generating reports
- * 
+ *
  * This service orchestrates the entire report generation process,
  * from fetching data to storing computed results.
  */
 
-import { createSSRClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 import {
   IReportGenerator,
   OrganizationReport,
@@ -29,7 +29,8 @@ export class ReportGenerator implements IReportGenerator {
     templateId: string,
     force: boolean = false
   ): Promise<OrganizationReport> {
-    const supabase = await createSSRClient();
+    // Use service role client to bypass RLS for server-side report generation
+    const supabase = createServiceRoleClient();
 
     // Fetch questionnaire to get organization_id
     const { data: questionnaire, error: qError } = await supabase
