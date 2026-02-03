@@ -139,13 +139,13 @@ export async function getQuestionnaireInviteLink(
     }
 
     // Get the most recent token for this questionnaire
-    const { data: token, error } = await supabase
+    const { data: tokenData, error } = await supabase
       .from('participant_access_tokens')
       .select('token')
       .eq('questionnaire_id', questionnaireId)
       .order('created_at', { ascending: false })
       .limit(1)
-      .maybeSingle()
+      .maybeSingle() as { data: { token: string } | null; error: any }
 
     if (error) {
       return {
@@ -154,7 +154,7 @@ export async function getQuestionnaireInviteLink(
       }
     }
 
-    if (!token) {
+    if (!tokenData) {
       return {
         success: true,
         link: undefined,
@@ -163,7 +163,7 @@ export async function getQuestionnaireInviteLink(
 
     // Generate the invitation link
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-    const inviteLink = `${baseUrl}/q/${token.token}`
+    const inviteLink = `${baseUrl}/q/${tokenData.token}`
 
     return {
       success: true,

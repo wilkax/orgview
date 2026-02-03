@@ -231,7 +231,7 @@ export default function QuestionnaireResponseForm({
             {section.questions.map((question, questionIndex) => (
               <div
                 key={question.id}
-                ref={el => questionRefs.current[question.id] = el}
+                ref={el => { questionRefs.current[question.id] = el }}
                 className="border-l-2 border-blue-500 pl-3 py-1"
               >
                 <label className="block text-sm font-medium text-gray-900 mb-2">
