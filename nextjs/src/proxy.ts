@@ -1,24 +1,24 @@
 import { type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/proxy'
-import { defaultLocale, locales, type Locale } from '@/i18n/request'
+import createIntlMiddleware from 'next-intl/middleware'
+import { routing } from '@/i18n/routing'
+
+// Create the next-intl middleware
+const handleI18nRouting = createIntlMiddleware(routing)
 
 export async function proxy(request: NextRequest) {
-    // First, handle Supabase session
-    const response = await updateSession(request)
+    // Step 1: Handle i18n routing
+    const response = handleI18nRouting(request)
 
-    // Then, handle locale
-    const locale = (request.cookies.get('NEXT_LOCALE')?.value as Locale) || defaultLocale
+    // Step 2: Handle Supabase session (updateSession will modify the response)
+    const finalResponse = await updateSession(request, response)
 
-    // Validate locale
-    if (!locales.includes(locale)) {
-        response.cookies.set('NEXT_LOCALE', defaultLocale)
-    }
-
-    return response
+    return finalResponse
 }
 
 export const config = {
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
     ],
 }
+

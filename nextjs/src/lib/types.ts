@@ -332,6 +332,8 @@ export type Database = {
           start_date: string | null
           end_date: string | null
           config: Json
+          language: string
+          available_languages: string[]
           created_at: string
           updated_at: string
           created_by: string | null
@@ -348,6 +350,8 @@ export type Database = {
           start_date?: string | null
           end_date?: string | null
           config?: Json
+          language?: string
+          available_languages?: string[]
           created_at?: string
           updated_at?: string
           created_by?: string | null
@@ -364,9 +368,44 @@ export type Database = {
           start_date?: string | null
           end_date?: string | null
           config?: Json
+          language?: string
+          available_languages?: string[]
           created_at?: string
           updated_at?: string
           created_by?: string | null
+        }
+        Relationships: []
+      }
+      questionnaire_translations: {
+        Row: {
+          id: string
+          questionnaire_id: string
+          language: string
+          title: string
+          description: string | null
+          schema: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          questionnaire_id: string
+          language: string
+          title: string
+          description?: string | null
+          schema?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          questionnaire_id?: string
+          language?: string
+          title?: string
+          description?: string | null
+          schema?: Json
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }

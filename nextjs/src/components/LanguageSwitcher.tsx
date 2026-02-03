@@ -1,21 +1,23 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Globe } from 'lucide-react';
 import { useState, useTransition } from 'react';
-import { locales, type Locale } from '@/i18n/request';
+import { locales, type Locale } from '@/i18n/config';
+import { useRouter, usePathname } from '@/i18n/routing';
 
-export default function LanguageSwitcher({ currentLocale }: { currentLocale: Locale }) {
+export default function LanguageSwitcher() {
   const t = useTranslations();
+  const locale = useLocale() as Locale;
+  const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const changeLanguage = (locale: Locale) => {
+  const changeLanguage = (newLocale: Locale) => {
     startTransition(() => {
-      // Set cookie
-      document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000`;
-      // Reload page to apply new locale
-      window.location.reload();
+      router.replace(pathname, { locale: newLocale });
+      setIsOpen(false);
     });
   };
 
@@ -27,7 +29,7 @@ export default function LanguageSwitcher({ currentLocale }: { currentLocale: Loc
         disabled={isPending}
       >
         <Globe size={16} />
-        <span>{t(`languages.${currentLocale}`)}</span>
+        <span>{t(`languages.${locale}`)}</span>
       </button>
 
       {isOpen && (
@@ -41,19 +43,16 @@ export default function LanguageSwitcher({ currentLocale }: { currentLocale: Loc
           {/* Dropdown */}
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-200">
             <div className="py-1">
-              {locales.map((locale) => (
+              {locales.map((loc) => (
                 <button
-                  key={locale}
-                  onClick={() => {
-                    changeLanguage(locale);
-                    setIsOpen(false);
-                  }}
+                  key={loc}
+                  onClick={() => changeLanguage(loc)}
                   className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
-                    locale === currentLocale ? 'bg-gray-50 font-medium' : ''
+                    loc === locale ? 'bg-gray-50 font-medium' : ''
                   }`}
                   disabled={isPending}
                 >
-                  {t(`languages.${locale}`)}
+                  {t(`languages.${loc}`)}
                 </button>
               ))}
             </div>

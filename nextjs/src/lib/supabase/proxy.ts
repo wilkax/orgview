@@ -2,8 +2,9 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { Database } from '@/lib/types'
 
-export async function updateSession(request: NextRequest) {
-    let supabaseResponse = NextResponse.next({
+export async function updateSession(request: NextRequest, response?: NextResponse) {
+    // Use the provided response (from i18n middleware) or create a new one
+    let supabaseResponse = response || NextResponse.next({
         request,
     })
 
@@ -36,32 +37,39 @@ export async function updateSession(request: NextRequest) {
 
     const {data: user} = await supabase.auth.getUser()
 
+    // Get pathname, accounting for locale prefix (e.g., /en/app or /de/app)
+    const pathname = request.nextUrl.pathname
+    // Match optional locale prefix: /[locale]/path or /path
+    const pathWithoutLocale = pathname.replace(/^\/(en|de)/, '') || '/'
+
     // Redirect to login if not authenticated and trying to access protected routes
     if (
-        (!user || !user.user) && request.nextUrl.pathname.startsWith('/app')
+        (!user || !user.user) && pathWithoutLocale.startsWith('/app')
     ) {
         const url = request.nextUrl.clone()
-        url.pathname = '/auth/login'
+        // Preserve locale in redirect
+        const localeMatch = pathname.match(/^\/(en|de)/)
+        url.pathname = localeMatch ? `${localeMatch[0]}/auth/login` : '/auth/login'
         return NextResponse.redirect(url)
     }
 
     // Handle role-based access control for authenticated users
     if (user && user.user) {
-        const pathname = request.nextUrl.pathname
-
         // Check access to /admin/* routes (system admin only)
-        if (pathname.startsWith('/admin')) {
+        if (pathWithoutLocale.startsWith('/admin')) {
             const { data: isSystemAdmin } = await supabase.rpc('is_system_admin')
 
             if (!isSystemAdmin) {
                 const url = request.nextUrl.clone()
-                url.pathname = '/app'
+                // Preserve locale in redirect
+                const localeMatch = pathname.match(/^\/(en|de)/)
+                url.pathname = localeMatch ? `${localeMatch[0]}/app` : '/app'
                 return NextResponse.redirect(url)
             }
         }
 
         // Check access to /app/org/[slug]/* routes (org members or system admin)
-        const orgMatch = pathname.match(/^\/app\/org\/([^\/]+)/)
+        const orgMatch = pathWithoutLocale.match(/^\/app\/org\/([^\/]+)/)
         if (orgMatch) {
             const orgSlug = orgMatch[1]
 
@@ -81,7 +89,9 @@ export async function updateSession(request: NextRequest) {
 
                 if (!isSystemAdmin && !isOrgMember) {
                     const url = request.nextUrl.clone()
-                    url.pathname = '/app'
+                    // Preserve locale in redirect
+                    const localeMatch = pathname.match(/^\/(en|de)/)
+                    url.pathname = localeMatch ? `${localeMatch[0]}/app` : '/app'
                     return NextResponse.redirect(url)
                 }
             }
@@ -89,7 +99,7 @@ export async function updateSession(request: NextRequest) {
     }
 
     // Handle participant access via token for /q/[token]/* routes
-    const participantMatch = request.nextUrl.pathname.match(/^\/q\/([^\/]+)/)
+    const participantMatch = pathWithoutLocale.match(/^\/q\/([^\/]+)/)
     if (participantMatch) {
         const token = participantMatch[1]
 
@@ -101,7 +111,9 @@ export async function updateSession(request: NextRequest) {
 
         if (!tokenValidation || tokenValidation.length === 0 || !tokenValidation[0].is_valid) {
             const url = request.nextUrl.clone()
-            url.pathname = '/invalid-token'
+            // Preserve locale in redirect
+            const localeMatch = pathname.match(/^\/(en|de)/)
+            url.pathname = localeMatch ? `${localeMatch[0]}/invalid-token` : '/invalid-token'
             return NextResponse.redirect(url)
         }
     }

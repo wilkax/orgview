@@ -1,5 +1,54 @@
 # Internationalization (i18n) Implementation Guide
 
+## 🎯 Quick Start - How to Use i18n Features
+
+### For End Users
+
+#### 1. **Changing Website Language (Authenticated Users)**
+- Log in to your account
+- Click on your profile icon in the top-right corner
+- In the dropdown menu, you'll see a "Language" section
+- Select your preferred language (English or German)
+- The page will reload with the new language
+
+#### 2. **Changing Questionnaire Language (Participants)**
+- When you open a questionnaire link (e.g., `/q/[token]`)
+- If the questionnaire supports multiple languages, you'll see a language selector in the top-right corner of the questionnaire header
+- Click the language dropdown and select your preferred language
+- The questionnaire will immediately switch to that language
+- Your language preference is saved in your browser for future visits
+
+### For Administrators
+
+#### 1. **Creating Multilingual Questionnaires**
+Currently, questionnaires are created in a single language (default: English). To add support for multiple languages:
+
+1. Create a questionnaire in the primary language
+2. The `language` field will be set to 'en' by default
+3. The `available_languages` field will be set to `['en']` by default
+
+**To add translations** (requires manual database update for now):
+```sql
+-- Update the questionnaire to support multiple languages
+UPDATE questionnaires
+SET available_languages = ARRAY['en', 'de']
+WHERE id = 'your-questionnaire-id';
+
+-- Add a German translation
+INSERT INTO questionnaire_translations (questionnaire_id, language, title, description, schema)
+VALUES (
+  'your-questionnaire-id',
+  'de',
+  'German Title',
+  'German Description',
+  '{"sections": [...]}'  -- Translated schema
+);
+```
+
+**Future Enhancement**: A UI for managing questionnaire translations will be added to the admin panel.
+
+---
+
 ## Overview
 
 This document describes the multi-language support implementation for the OrgView application, with a focus on questionnaire translations.
@@ -11,11 +60,11 @@ This document describes the multi-language support implementation for the OrgVie
 The Next.js application uses `next-intl` for internationalization:
 
 - **Supported Languages**: English (en), German (de)
-- **Configuration**: `src/i18n/request.ts` and `src/i18n/routing.ts`
+- **Configuration**: `src/i18n/config.ts`, `src/i18n/request.ts` and `src/i18n/routing.ts`
 - **Translation Files**: `messages/en.json` and `messages/de.json`
-- **Proxy Pattern**:
+- **Middleware**:
   - `src/lib/supabase/proxy.ts` - Supabase session management helper
-  - `src/proxy.ts` - Main proxy file that handles both Supabase session management and i18n locale detection/persistence (following Next.js best practices)
+  - `src/middleware.ts` - Main middleware file that handles both Supabase session management and i18n locale detection/persistence
 
 ### 2. Questionnaire Multi-Language Support
 

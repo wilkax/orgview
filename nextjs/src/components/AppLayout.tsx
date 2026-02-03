@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -214,6 +215,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                     </p>
                                 </div>
                                 <div className="py-1">
+                                    <div className="px-4 py-2 border-b border-gray-100">
+                                        <p className="text-xs text-gray-500 mb-2">Language</p>
+                                        <LanguageSwitcher />
+                                    </div>
                                     <button
                                         onClick={() => {
                                             setUserDropdownOpen(false);
