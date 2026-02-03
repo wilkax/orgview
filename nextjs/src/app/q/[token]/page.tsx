@@ -93,24 +93,24 @@ export default async function ParticipantQuestionnairePage({
   const isWithinTimeFrame = !isBeforeStart && !isAfterEnd
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <div className="text-sm text-gray-500 mb-2">{organization.name}</div>
-          <h1 className="text-3xl font-bold text-gray-900">
+        <div className="bg-white shadow rounded-lg p-4 mb-4">
+          <div className="text-xs text-gray-500 mb-1">{organization.name}</div>
+          <h1 className="text-xl font-bold text-gray-900">
             {questionnaire.title}
           </h1>
           {questionnaire.description && (
-            <p className="mt-2 text-gray-600">{questionnaire.description}</p>
+            <p className="mt-1 text-sm text-gray-600">{questionnaire.description}</p>
           )}
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <p className="text-sm text-gray-500">
+          <div className="mt-3 pt-3 border-t border-gray-200">
+            <p className="text-xs text-gray-500">
               Participant: <span className="font-medium">{participant.email}</span>
               {participant.name && ` (${participant.name})`}
             </p>
             {(startDate || endDate) && (
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-xs text-gray-500 mt-1">
                 {startDate && `Available from: ${startDate.toLocaleDateString()}`}
                 {startDate && endDate && ' • '}
                 {endDate && `Until: ${endDate.toLocaleDateString()}`}
@@ -121,11 +121,11 @@ export default async function ParticipantQuestionnairePage({
 
         {/* Time Frame Warning */}
         {isBeforeStart && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-5 w-5 text-yellow-400"
+                  className="h-4 w-4 text-yellow-400"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -136,11 +136,11 @@ export default async function ParticipantQuestionnairePage({
                   />
                 </svg>
               </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-yellow-800">
+              <div className="ml-2">
+                <h3 className="text-xs font-medium text-yellow-800">
                   Questionnaire Not Yet Available
                 </h3>
-                <p className="mt-1 text-sm text-yellow-700">
+                <p className="mt-0.5 text-xs text-yellow-700">
                   This questionnaire will be available starting {startDate?.toLocaleDateString()}.
                   Please come back after this date to submit your response.
                 </p>
@@ -150,11 +150,11 @@ export default async function ParticipantQuestionnairePage({
         )}
 
         {isAfterEnd && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-5 w-5 text-red-400"
+                  className="h-4 w-4 text-red-400"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -165,11 +165,11 @@ export default async function ParticipantQuestionnairePage({
                   />
                 </svg>
               </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
+              <div className="ml-2">
+                <h3 className="text-xs font-medium text-red-800">
                   Questionnaire Closed
                 </h3>
-                <p className="mt-1 text-sm text-red-700">
+                <p className="mt-0.5 text-xs text-red-700">
                   This questionnaire closed on {endDate?.toLocaleDateString()}.
                   It is no longer accepting responses.
                 </p>
@@ -180,11 +180,11 @@ export default async function ParticipantQuestionnairePage({
 
         {/* Status Message */}
         {questionnaire.status !== 'active' && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-5 w-5 text-yellow-400"
+                  className="h-4 w-4 text-yellow-400"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -195,11 +195,11 @@ export default async function ParticipantQuestionnairePage({
                   />
                 </svg>
               </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-yellow-800">
+              <div className="ml-2">
+                <h3 className="text-xs font-medium text-yellow-800">
                   Questionnaire {questionnaire.status}
                 </h3>
-                <p className="mt-1 text-sm text-yellow-700">
+                <p className="mt-0.5 text-xs text-yellow-700">
                   This questionnaire is currently {questionnaire.status} and may
                   not accept responses.
                 </p>
@@ -210,11 +210,11 @@ export default async function ParticipantQuestionnairePage({
 
         {/* Existing Response Message */}
         {existingResponse && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-5 w-5 text-blue-400"
+                  className="h-4 w-4 text-blue-400"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -225,11 +225,11 @@ export default async function ParticipantQuestionnairePage({
                   />
                 </svg>
               </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-blue-800">
+              <div className="ml-2">
+                <h3 className="text-xs font-medium text-blue-800">
                   Response already submitted
                 </h3>
-                <p className="mt-1 text-sm text-blue-700">
+                <p className="mt-0.5 text-xs text-blue-700">
                   You submitted a response on{' '}
                   {new Date(existingResponse.submitted_at).toLocaleString()}.
                   You can update your response below.
