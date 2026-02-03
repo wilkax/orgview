@@ -2,6 +2,8 @@ import { createSSRClient } from '@/lib/supabase/server'
 import { Tables } from '@/lib/types'
 import { redirect } from 'next/navigation'
 import QuestionnaireResponseForm from '@/components/QuestionnaireResponseForm'
+import QuestionnaireLanguageSelector from '@/components/QuestionnaireLanguageSelector'
+import { getTranslations } from 'next-intl/server'
 
 export default async function ParticipantQuestionnairePage({
   params,
@@ -10,6 +12,7 @@ export default async function ParticipantQuestionnairePage({
 }) {
   const { token } = await params
   const supabase = await createSSRClient()
+  const t = await getTranslations('questionnaire')
 
   // Validate token
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,28 +95,39 @@ export default async function ParticipantQuestionnairePage({
   const isAfterEnd = endDate && now > endDate
   const isWithinTimeFrame = !isBeforeStart && !isAfterEnd
 
+  // Get available languages from questionnaire
+  const availableLanguages = (questionnaire.config as { available_languages?: string[] })?.available_languages || ['en'];
+
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="bg-white shadow rounded-lg p-4 mb-4">
-          <div className="text-xs text-gray-500 mb-1">{organization.name}</div>
-          <h1 className="text-xl font-bold text-gray-900">
-            {questionnaire.title}
-          </h1>
-          {questionnaire.description && (
-            <p className="mt-1 text-sm text-gray-600">{questionnaire.description}</p>
-          )}
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="text-xs text-gray-500 mb-1">{organization.name}</div>
+              <h1 className="text-xl font-bold text-gray-900">
+                {questionnaire.title}
+              </h1>
+              {questionnaire.description && (
+                <p className="mt-1 text-sm text-gray-600">{questionnaire.description}</p>
+              )}
+            </div>
+            {/* Language Selector */}
+            {availableLanguages.length > 1 && (
+              <QuestionnaireLanguageSelector availableLanguages={availableLanguages} />
+            )}
+          </div>
           <div className="mt-3 pt-3 border-t border-gray-200">
             <p className="text-xs text-gray-500">
-              Participant: <span className="font-medium">{participant.email}</span>
+              {t('participant')}: <span className="font-medium">{participant.email}</span>
               {participant.name && ` (${participant.name})`}
             </p>
             {(startDate || endDate) && (
               <p className="text-xs text-gray-500 mt-1">
-                {startDate && `Available from: ${startDate.toLocaleDateString()}`}
+                {startDate && `${t('availableFrom')}: ${startDate.toLocaleDateString()}`}
                 {startDate && endDate && ' • '}
-                {endDate && `Until: ${endDate.toLocaleDateString()}`}
+                {endDate && `${t('until')}: ${endDate.toLocaleDateString()}`}
               </p>
             )}
           </div>
@@ -138,11 +152,10 @@ export default async function ParticipantQuestionnairePage({
               </div>
               <div className="ml-2">
                 <h3 className="text-xs font-medium text-yellow-800">
-                  Questionnaire Not Yet Available
+                  {t('notYetAvailable')}
                 </h3>
                 <p className="mt-0.5 text-xs text-yellow-700">
-                  This questionnaire will be available starting {startDate?.toLocaleDateString()}.
-                  Please come back after this date to submit your response.
+                  {t('notYetAvailableMessage', { date: startDate?.toLocaleDateString() })}
                 </p>
               </div>
             </div>
@@ -167,11 +180,10 @@ export default async function ParticipantQuestionnairePage({
               </div>
               <div className="ml-2">
                 <h3 className="text-xs font-medium text-red-800">
-                  Questionnaire Closed
+                  {t('closed')}
                 </h3>
                 <p className="mt-0.5 text-xs text-red-700">
-                  This questionnaire closed on {endDate?.toLocaleDateString()}.
-                  It is no longer accepting responses.
+                  {t('closedMessage', { date: endDate?.toLocaleDateString() })}
                 </p>
               </div>
             </div>

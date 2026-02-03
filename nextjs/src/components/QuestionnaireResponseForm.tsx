@@ -4,6 +4,12 @@ import { useState, useEffect, useRef } from 'react'
 import { createSPASassClient } from '@/lib/supabase/client'
 import { Tables } from '@/lib/types'
 import { CheckCircle2, AlertCircle } from 'lucide-react'
+import {
+  MultilingualQuestionnaireSchema,
+  getLocalizedSchema,
+  type SupportedLanguage
+} from '@/lib/questionnaire/i18n-schema'
+import { useTranslations } from 'next-intl'
 
 type Questionnaire = Tables<'questionnaires'>
 type Participant = Tables<'participants'>
@@ -52,15 +58,19 @@ export default function QuestionnaireResponseForm({
   existingResponse,
   isWithinTimeFrame = true
 }: Props) {
+  const t = useTranslations('questionnaire')
+  const tErrors = useTranslations('errors')
   const [answers, setAnswers] = useState<Answers>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(!!existingResponse)
   const [error, setError] = useState<string | null>(null)
+  const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('en')
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
   // Type guard: check if schema has the expected structure
   const schemaData = questionnaire.schema
-  let schema: QuestionnaireSchema = { sections: [] }
+  let rawSchema: QuestionnaireSchema | MultilingualQuestionnaireSchema = { sections: [] }
+  let isMultilingual = false
 
   if (
     schemaData &&
@@ -69,14 +79,42 @@ export default function QuestionnaireResponseForm({
     'sections' in schemaData &&
     Array.isArray(schemaData.sections)
   ) {
-    schema = schemaData as unknown as QuestionnaireSchema
+    rawSchema = schemaData as unknown as QuestionnaireSchema
+    // Check if it's a multilingual schema
+    if ('primaryLanguage' in schemaData && 'availableLanguages' in schemaData) {
+      isMultilingual = true
+      rawSchema = schemaData as unknown as MultilingualQuestionnaireSchema
+    }
   }
+
+  // Get localized schema based on current language
+  const schema: QuestionnaireSchema = isMultilingual
+    ? getLocalizedSchema(rawSchema as MultilingualQuestionnaireSchema, currentLanguage)
+    : rawSchema as QuestionnaireSchema
 
   useEffect(() => {
     if (existingResponse && existingResponse.answers) {
       setAnswers(existingResponse.answers as unknown as Answers)
     }
   }, [existingResponse])
+
+  // Listen for language changes from QuestionnaireLanguageSelector
+  useEffect(() => {
+    const handleLanguageChange = (event: CustomEvent<string>) => {
+      setCurrentLanguage(event.detail as SupportedLanguage)
+    }
+
+    // Get initial language from localStorage
+    const savedLanguage = localStorage.getItem('questionnaire_language')
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'de')) {
+      setCurrentLanguage(savedLanguage as SupportedLanguage)
+    }
+
+    window.addEventListener('questionnaireLanguageChange', handleLanguageChange as EventListener)
+    return () => {
+      window.removeEventListener('questionnaireLanguageChange', handleLanguageChange as EventListener)
+    }
+  }, [])
 
   function scrollToNextQuestion(currentQuestionId: string) {
     // Get all question IDs in order
@@ -167,7 +205,7 @@ export default function QuestionnaireResponseForm({
         .eq('id', existingResponse.id)
 
       if (updateError) {
-        setError('Failed to update response. Please try again.')
+        setError(tErrors('failedToUpdate'))
         setSubmitting(false)
         return
       }
@@ -183,7 +221,7 @@ export default function QuestionnaireResponseForm({
         })
 
       if (insertError) {
-        setError('Failed to submit response. Please try again.')
+        setError(tErrors('failedToSubmit'))
         setSubmitting(false)
         return
       }
@@ -198,12 +236,12 @@ export default function QuestionnaireResponseForm({
       <div className="bg-white shadow rounded-lg p-6 text-center">
         <CheckCircle2 className="mx-auto h-12 w-12 text-green-500 mb-3" />
         <h2 className="text-lg font-bold text-gray-900 mb-1">
-          {existingResponse ? 'Response Updated!' : 'Thank You!'}
+          {existingResponse ? t('updateResponse') + '!' : t('thankYou')}
         </h2>
         <p className="text-sm text-gray-600">
           {existingResponse
-            ? 'Your response has been successfully updated.'
-            : 'Your response has been submitted successfully.'}
+            ? t('responseUpdatedSuccess')
+            : t('responseSubmittedSuccess')}
         </p>
       </div>
     )
@@ -386,7 +424,7 @@ export default function QuestionnaireResponseForm({
                       maxLength={question.maxLength || 500}
                       rows={3}
                       className="block w-full text-xs border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Type your answer here..."
+                      placeholder={t('typeYourAnswer')}
                     />
                     <p className="text-xs text-gray-500 mt-0.5 text-right">
                       {((answers[question.id] as string) || '').length} / {question.maxLength || 500}
@@ -404,7 +442,7 @@ export default function QuestionnaireResponseForm({
         {!isWithinTimeFrame && (
           <div className="mb-3 p-2 bg-gray-50 border border-gray-200 rounded-md">
             <p className="text-xs text-gray-600">
-              This questionnaire is not currently accepting responses due to time restrictions.
+              {t('notAcceptingResponses')}
             </p>
           </div>
         )}
@@ -413,7 +451,7 @@ export default function QuestionnaireResponseForm({
           disabled={submitting || !isWithinTimeFrame}
           className="w-full py-2 px-3 text-sm bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {submitting ? 'Submitting...' : existingResponse ? 'Update Response' : 'Submit Response'}
+          {submitting ? t('submitting') : existingResponse ? t('updateResponse') : t('submitResponse')}
         </button>
       </div>
     </form>

@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { ShieldAlert } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+    const t = await getTranslations('auth');
+
     return (
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="text-center">
@@ -9,20 +12,20 @@ export default function RegisterPage() {
                     <ShieldAlert className="h-6 w-6 text-blue-600" />
                 </div>
                 <h2 className="mt-4 text-2xl font-bold text-gray-900">
-                    Invite Only
+                    {t('inviteOnly')}
                 </h2>
                 <p className="mt-2 text-sm text-gray-600">
-                    Registration is disabled. You can only join this platform by invitation.
+                    {t('registrationDisabled')}
                 </p>
                 <p className="mt-4 text-sm text-gray-600">
-                    If you have received an invitation email, please click the link in the email to set up your account.
+                    {t('invitationInstructions')}
                 </p>
                 <div className="mt-6">
                     <Link
                         href="/auth/login"
                         className="font-medium text-primary-600 hover:text-primary-500"
                     >
-                        ← Back to login
+                        ← {t('backToLogin')}
                     </Link>
                 </div>
             </div>

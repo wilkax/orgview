@@ -1,4 +1,8 @@
-export default function InvalidTokenPage() {
+import { getTranslations } from 'next-intl/server';
+
+export default async function InvalidTokenPage() {
+  const t = await getTranslations('errors');
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
@@ -19,13 +23,13 @@ export default function InvalidTokenPage() {
             </svg>
           </div>
           <h2 className="mt-4 text-2xl font-bold text-gray-900">
-            Invalid Access Token
+            {t('invalidToken')}
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            The access link you used is invalid, expired, or has already been used.
+            {t('invalidTokenMessage')}
           </p>
           <p className="mt-4 text-sm text-gray-500">
-            Please contact the organization administrator for a new access link.
+            {t('contactAdmin')}
           </p>
         </div>
       </div>
