@@ -86,6 +86,7 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState<'none' | 'average-desc' | 'average-asc' | 'median-desc' | 'median-asc'>('none');
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  const [selectedChartsForExport, setSelectedChartsForExport] = useState<string[]>([]);
 
   // Extract sections when questionnaire is selected
   useEffect(() => {
@@ -184,6 +185,27 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
     }
   };
 
+  // Toggle chart selection for export
+  const toggleChartSelection = (questionId: string) => {
+    if (selectedChartsForExport.includes(questionId)) {
+      setSelectedChartsForExport(prev => prev.filter(id => id !== questionId));
+    } else {
+      setSelectedChartsForExport(prev => [...prev, questionId]);
+    }
+  };
+
+  // Select all charts
+  const handleSelectAllCharts = () => {
+    if (!aggregatedData || !aggregatedData.questions) return;
+    const allQuestionIds = Object.keys(aggregatedData.questions);
+    setSelectedChartsForExport(allQuestionIds);
+  };
+
+  // Deselect all charts
+  const handleDeselectAllCharts = () => {
+    setSelectedChartsForExport([]);
+  };
+
   // Sort questions based on selected sort option
   const getSortedQuestions = () => {
     if (!aggregatedData || !aggregatedData.questions) return [];
@@ -204,15 +226,25 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
   };
 
   const handleExportPowerPoint = async () => {
-    if (!aggregatedData) return;
+    if (!aggregatedData || selectedChartsForExport.length === 0) return;
 
     try {
+      // Filter data to only include selected charts
+      const filteredData = {
+        ...aggregatedData,
+        questions: Object.fromEntries(
+          Object.entries(aggregatedData.questions).filter(([id]) =>
+            selectedChartsForExport.includes(id)
+          )
+        )
+      };
+
       const response = await fetch(`/api/org/${slug}/analytics/export-pptx`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           questionnaireId: selectedQuestionnaire,
-          data: aggregatedData,
+          data: filteredData,
         }),
       });
 
@@ -359,15 +391,33 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
           )}
         </div>
 
-        {/* Export Button */}
+        {/* Export Controls */}
         {aggregatedData && (
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex justify-between items-center">
+            <div className="flex gap-2">
+              <button
+                onClick={handleSelectAllCharts}
+                className="px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Select All
+              </button>
+              <button
+                onClick={handleDeselectAllCharts}
+                className="px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Deselect All
+              </button>
+              <span className="px-3 py-2 text-sm text-gray-600">
+                {selectedChartsForExport.length} chart{selectedChartsForExport.length !== 1 ? 's' : ''} selected
+              </span>
+            </div>
             <button
               onClick={handleExportPowerPoint}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={selectedChartsForExport.length === 0}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               <Download className="h-4 w-4" />
-              Export to PowerPoint
+              Export to PowerPoint ({selectedChartsForExport.length})
             </button>
           </div>
         )}
@@ -433,12 +483,31 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
             {/* Question Charts - Using sorted questions */}
             <div className="space-y-6">
               {getSortedQuestions().map(([questionId, questionData]: [string, any]) => (
-                <div key={questionId} className="bg-white border border-gray-200 rounded-lg p-6">
-                  <div className="mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      {questionData.questionText}
-                    </h3>
-                    <p className="text-sm text-gray-500">{questionData.sectionTitle}</p>
+                <div
+                  key={questionId}
+                  className={`bg-white border-2 rounded-lg p-6 transition-all ${
+                    selectedChartsForExport.includes(questionId)
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                        {questionData.questionText}
+                      </h3>
+                      <p className="text-sm text-gray-500">{questionData.sectionTitle}</p>
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedChartsForExport.includes(questionId)}
+                        onChange={() => toggleChartSelection(questionId)}
+                        className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                        title="Select for export"
+                      />
+                      <label className="text-xs text-gray-600">Export</label>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
