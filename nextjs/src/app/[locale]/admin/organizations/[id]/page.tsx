@@ -2,6 +2,7 @@ import { createSSRClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import InviteAdminForm from '@/components/InviteAdminForm'
 import InviteAuditorForm from '@/components/InviteAuditorForm'
 import RemoveMemberButton from '@/components/RemoveMemberButton'
@@ -17,6 +18,7 @@ export default async function OrganizationDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
+  const t = await getTranslations('organizations')
   const supabase = await createSSRClient()
 
   // Get organization details
@@ -52,7 +54,7 @@ export default async function OrganizationDetailPage({
           )
           return {
             ...member,
-            user: { email: userData.user?.email || 'Unknown' },
+            user: { email: userData.user?.email || t('unknown') },
           }
         })
       )
@@ -134,11 +136,10 @@ export default async function OrganizationDetailPage({
         <div className="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
           <div>
             <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Administrators ({admins.length})
+              {t('administrators')} ({admins.length})
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              Organization administrators have full access to manage the
-              organization
+              {t('administratorsDescription')}
             </p>
           </div>
           <InviteAdminForm organizationId={id} />
@@ -185,10 +186,10 @@ export default async function OrganizationDetailPage({
         <div className="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
           <div>
             <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Auditors ({auditors.length})
+              {t('auditors')} ({auditors.length})
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              Auditors can view and analyze questionnaire data
+              {t('auditorsDescription')}
             </p>
           </div>
           <InviteAuditorForm organizationId={id} />

@@ -1,8 +1,10 @@
 import { createSSRClient } from '@/lib/supabase/server'
 import { Tables } from '@/lib/types'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
 export default async function AdminDashboard() {
+  const t = await getTranslations('admin')
   const supabase = await createSSRClient()
 
   // Get statistics
@@ -30,9 +32,9 @@ export default async function AdminDashboard() {
   return (
     <div className="px-4 sm:px-0">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('dashboard')}</h2>
         <p className="mt-1 text-sm text-gray-600">
-          System administration overview
+          {t('statistics')}
         </p>
       </div>
 
@@ -59,7 +61,7 @@ export default async function AdminDashboard() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Organizations
+                    {t('organizations')}
                   </dt>
                   <dd className="text-3xl font-semibold text-gray-900">
                     {orgCount || 0}
@@ -73,7 +75,7 @@ export default async function AdminDashboard() {
               href="/admin/organizations"
               className="text-sm font-medium text-blue-600 hover:text-blue-500"
             >
-              View all
+              {t('viewAll')}
             </Link>
           </div>
         </div>
@@ -99,7 +101,7 @@ export default async function AdminDashboard() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Users with Roles
+                    {t('users')}
                   </dt>
                   <dd className="text-3xl font-semibold text-gray-900">
                     {userCount || 0}
@@ -131,7 +133,7 @@ export default async function AdminDashboard() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Participants
+                    {t('participants')}
                   </dt>
                   <dd className="text-3xl font-semibold text-gray-900">
                     {participantCount || 0}
@@ -163,7 +165,7 @@ export default async function AdminDashboard() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Questionnaires
+                    {t('questionnaires')}
                   </dt>
                   <dd className="text-3xl font-semibold text-gray-900">
                     {questionnaireCount || 0}
@@ -179,7 +181,7 @@ export default async function AdminDashboard() {
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Recent Organizations
+            {t('recentOrganizations')}
           </h3>
         </div>
         <ul className="divide-y divide-gray-200">
@@ -203,7 +205,7 @@ export default async function AdminDashboard() {
             ))
           ) : (
             <li className="px-4 py-4 sm:px-6 text-sm text-gray-500">
-              No organizations yet
+              {t('organizations')}
             </li>
           )}
         </ul>

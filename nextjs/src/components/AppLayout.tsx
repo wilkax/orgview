@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {usePathname, useRouter} from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
     Home,
     User,
@@ -25,7 +26,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
-
+    const t = useTranslations('navigation');
 
     const { user } = useGlobal();
 
@@ -51,18 +52,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
 
     // Check if we're on an organization page
-    const orgMatch = pathname.match(/^\/app\/org\/([^\/]+)/);
+    // Account for locale prefix (e.g., /de/app/org/slug or /app/org/slug)
+    const orgMatch = pathname.match(/^\/(?:[a-z]{2}\/)?app\/org\/([^\/]+)/);
     const currentOrgSlug = orgMatch ? orgMatch[1] : null;
 
     // Build navigation based on user roles
     const navigation = [
-        { name: 'Homepage', href: '/app', icon: Home },
+        { name: t('homepage'), href: '/app', icon: Home },
     ];
 
     // Add Organizations and Approaches for system admins
     if (user?.roles?.isSystemAdmin) {
-        navigation.push({ name: 'Organizations', href: '/app/admin/organizations', icon: Building2 });
-        navigation.push({ name: 'Approaches', href: '/app/admin/approaches', icon: Layers });
+        navigation.push({ name: t('organizations'), href: '/app/admin/organizations', icon: Building2 });
+        navigation.push({ name: t('approaches'), href: '/app/admin/approaches', icon: Layers });
     }
 
     // Add organization links
@@ -77,14 +79,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
 
     // Always add User Settings
-    navigation.push({ name: 'User Settings', href: '/app/user-settings', icon: User });
+    navigation.push({ name: t('userSettings'), href: '/app/user-settings', icon: User });
 
     // Build organization sub-navigation if on an org page
     const orgSubNavigation = currentOrgSlug ? [
-        { name: 'Dashboard', href: `/app/org/${currentOrgSlug}` },
-        { name: 'Questionnaires', href: `/app/org/${currentOrgSlug}/questionnaires` },
-        { name: 'Analytics', href: `/app/org/${currentOrgSlug}/analytics` },
-        { name: 'Participants', href: `/app/org/${currentOrgSlug}/participants` },
+        { name: t('dashboard'), href: `/app/org/${currentOrgSlug}` },
+        { name: t('questionnaires'), href: `/app/org/${currentOrgSlug}/questionnaires` },
+        { name: t('analytics'), href: `/app/org/${currentOrgSlug}/analytics` },
+        { name: t('participants'), href: `/app/org/${currentOrgSlug}/participants` },
     ] : [];
 
     const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
@@ -209,14 +211,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         {isUserDropdownOpen && (
                             <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border">
                                 <div className="p-2 border-b border-gray-100">
-                                    <p className="text-xs text-gray-500">Signed in as</p>
+                                    <p className="text-xs text-gray-500">{t('signedInAs')}</p>
                                     <p className="text-sm font-medium text-gray-900 truncate">
                                         {user?.email}
                                     </p>
                                 </div>
                                 <div className="py-1">
                                     <div className="px-4 py-2 border-b border-gray-100">
-                                        <p className="text-xs text-gray-500 mb-2">Language</p>
+                                        <p className="text-xs text-gray-500 mb-2">{t('language')}</p>
                                         <LanguageSwitcher />
                                     </div>
                                     <button
@@ -227,7 +229,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                         className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                     >
                                         <Key className="mr-3 h-4 w-4 text-gray-400"/>
-                                        Change Password
+                                        {t('changePassword')}
                                     </button>
                                     <button
                                         onClick={() => {
@@ -237,7 +239,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                         className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                                     >
                                         <LogOut className="mr-3 h-4 w-4 text-red-400"/>
-                                        Sign Out
+                                        {t('signOut')}
                                     </button>
                                 </div>
                             </div>

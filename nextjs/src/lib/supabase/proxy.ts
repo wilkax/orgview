@@ -105,11 +105,23 @@ export async function updateSession(request: NextRequest, response?: NextRespons
 
         // Validate token
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: tokenValidation } = await (supabase as any).rpc('validate_participant_token', {
+        const { data: tokenValidation, error: tokenError } = await (supabase as any).rpc('validate_participant_token', {
             token_value: token
         })
 
+        // Debug logging
+        console.log('Token validation in proxy:', {
+            token: token.substring(0, 20) + '...',
+            tokenValidation,
+            tokenError,
+            hasData: !!tokenValidation,
+            length: tokenValidation?.length,
+            isValid: tokenValidation?.[0]?.is_valid,
+            isShared: tokenValidation?.[0]?.is_shared
+        })
+
         if (!tokenValidation || tokenValidation.length === 0 || !tokenValidation[0].is_valid) {
+            console.log('Token validation failed, redirecting to /invalid-token')
             const url = request.nextUrl.clone()
             // Preserve locale in redirect
             const localeMatch = pathname.match(/^\/(en|de)/)

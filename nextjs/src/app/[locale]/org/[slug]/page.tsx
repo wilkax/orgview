@@ -1,4 +1,5 @@
 import { createSSRClient } from '@/lib/supabase/server'
+import { getTranslations } from 'next-intl/server'
 import { Tables } from '@/lib/types'
 import Link from 'next/link'
 import InviteAuditorForm from '@/components/InviteAuditorForm'
@@ -10,6 +11,7 @@ export default async function OrgDashboard({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+  const t = await getTranslations('organization')
   const supabase = await createSSRClient()
 
   // Get organization
@@ -75,7 +77,7 @@ export default async function OrgDashboard({
   return (
     <div className="px-4 sm:px-0">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('dashboard')}</h2>
         <p className="mt-1 text-sm text-gray-600">{org.description}</p>
       </div>
 
@@ -102,7 +104,7 @@ export default async function OrgDashboard({
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Questionnaires
+                    {t('questionnaires')}
                   </dt>
                   <dd className="text-3xl font-semibold text-gray-900">
                     {questionnaireCount || 0}
@@ -134,7 +136,7 @@ export default async function OrgDashboard({
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Participants
+                    {t('participants')}
                   </dt>
                   <dd className="text-3xl font-semibold text-gray-900">
                     {participantCount || 0}
@@ -166,7 +168,7 @@ export default async function OrgDashboard({
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Responses
+                    {t('responses')}
                   </dt>
                   <dd className="text-3xl font-semibold text-gray-900">
                     {responseCount || 0}
@@ -198,7 +200,7 @@ export default async function OrgDashboard({
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Team Members
+                    {t('members')}
                   </dt>
                   <dd className="text-3xl font-semibold text-gray-900">
                     {memberCount || 0}
@@ -214,19 +216,19 @@ export default async function OrgDashboard({
       <div className="bg-white shadow rounded-lg mb-6">
         <div className="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Team Members
+            {t('members')}
           </h3>
           {userIsOrgAdmin && <InviteAuditorForm organizationId={org.id} />}
         </div>
         <div className="px-4 py-5 sm:px-6">
           <p className="text-sm text-gray-500">
-            {memberCount || 0} member{memberCount !== 1 ? 's' : ''} in this organization
+            {memberCount || 0} {memberCount !== 1 ? t('common.members') : t('common.member')} {t('common.inThisOrganization')}
           </p>
           <Link
             href={`/org/${slug}/members`}
             className="mt-2 inline-block text-sm text-blue-600 hover:text-blue-500"
           >
-            View all members →
+            {t('common.viewAllMembers')} →
           </Link>
         </div>
       </div>
@@ -235,13 +237,13 @@ export default async function OrgDashboard({
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Recent Questionnaires
+            {t('common.recentQuestionnaires')}
           </h3>
           <Link
             href={`/org/${slug}/questionnaires`}
             className="text-sm text-blue-600 hover:text-blue-500"
           >
-            View all
+            {t('common.viewAll')}
           </Link>
         </div>
         <ul className="divide-y divide-gray-200">
@@ -254,7 +256,7 @@ export default async function OrgDashboard({
                       {q.title}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Status:{' '}
+                      {t('common.status')}: {' '}
                       <span className="capitalize">{q.status}</span>
                     </p>
                   </div>
@@ -266,7 +268,7 @@ export default async function OrgDashboard({
             ))
           ) : (
             <li className="px-4 py-4 sm:px-6 text-sm text-gray-500">
-              No questionnaires yet
+              {t('common.noQuestionnairesYet')}
             </li>
           )}
         </ul>

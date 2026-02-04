@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { createSPASassClient } from '@/lib/supabase/client'
 import { Tables } from '@/lib/types'
 import { Plus, FileText, Layers } from 'lucide-react'
@@ -9,6 +10,8 @@ import Link from 'next/link'
 type Approach = Tables<'approaches'>
 
 export default function ApproachesPage() {
+  const t = useTranslations('approaches')
+  const c = useTranslations('common')
   const [approaches, setApproaches] = useState<Approach[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -72,16 +75,16 @@ export default function ApproachesPage() {
   }
 
   if (loading) {
-    return <div className="p-6">Loading...</div>
+    return <div className="p-6">{t('loading')}</div>
   }
 
   return (
     <div className="px-4 sm:px-0">
       <div className="sm:flex sm:items-center mb-6">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-bold text-gray-900">Approaches</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Manage analysis approaches and their questionnaire templates
+            {t('description')}
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -90,7 +93,7 @@ export default function ApproachesPage() {
             className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
-            Create Approach
+            {t('createApproach')}
           </button>
         </div>
       </div>
@@ -99,10 +102,10 @@ export default function ApproachesPage() {
       {showCreateForm && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-lg font-medium mb-4">Create New Approach</h2>
+            <h2 className="text-lg font-medium mb-4">{t('createApproach')}</h2>
             <form onSubmit={createApproach} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <label className="block text-sm font-medium text-gray-700">{c('name')}</label>
                 <input
                   type="text"
                   required
@@ -112,7 +115,7 @@ export default function ApproachesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Slug</label>
+                <label className="block text-sm font-medium text-gray-700">{c('slug')}</label>
                 <input
                   type="text"
                   required
@@ -122,7 +125,7 @@ export default function ApproachesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Category</label>
+                <label className="block text-sm font-medium text-gray-700">{c('category')}</label>
                 <input
                   type="text"
                   value={newApproach.category}
@@ -131,7 +134,7 @@ export default function ApproachesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <label className="block text-sm font-medium text-gray-700">{c('description')}</label>
                 <textarea
                   value={newApproach.description}
                   onChange={(e) => setNewApproach({ ...newApproach, description: e.target.value })}
@@ -145,13 +148,13 @@ export default function ApproachesPage() {
                   onClick={() => setShowCreateForm(false)}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                 >
-                  Cancel
+                  {c('cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
                 >
-                  Create
+                  {c('create')}
                 </button>
               </div>
             </form>
@@ -178,7 +181,7 @@ export default function ApproachesPage() {
                             : 'bg-gray-100 text-gray-800'
                         }`}
                       >
-                        {approach.is_active ? 'Active' : 'Inactive'}
+                        {approach.is_active ? t('active') : t('inactive')}
                       </span>
                       {approach.category && (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -193,7 +196,7 @@ export default function ApproachesPage() {
                     )}
                     <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
                       <span>Slug: {approach.slug}</span>
-                      <span>Created: {new Date(approach.created_at).toLocaleDateString()}</span>
+                      <span>{ t('created') } {new Date(approach.created_at).toLocaleDateString(c('locale'))}</span>
                     </div>
                   </div>
                   <div className="ml-4 flex items-center gap-2">
@@ -202,7 +205,7 @@ export default function ApproachesPage() {
                       className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700"
                     >
                       <FileText className="h-4 w-4" />
-                      Templates
+                      {t('templates')}
                     </Link>
                     <button
                       onClick={() => toggleActive(approach.id, approach.is_active)}
@@ -212,7 +215,7 @@ export default function ApproachesPage() {
                           : 'text-green-700 bg-green-100 hover:bg-green-200'
                       }`}
                     >
-                      {approach.is_active ? 'Deactivate' : 'Activate'}
+                      {approach.is_active ? t('deactivate') : t('activate')}
                     </button>
                   </div>
                 </div>
@@ -223,10 +226,10 @@ export default function ApproachesPage() {
           <div className="text-center py-12">
             <Layers className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">
-              No approaches
+              {c('noApproaches')}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              Get started by creating a new approach.
+              {c('getStartedApproach')}
             </p>
           </div>
         )}

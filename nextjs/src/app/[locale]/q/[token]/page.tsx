@@ -1,88 +1,130 @@
-import { createSSRClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { Tables } from '@/lib/types'
 import { redirect } from 'next/navigation'
 import QuestionnaireResponseForm from '@/components/QuestionnaireResponseForm'
 import QuestionnaireLanguageSelector from '@/components/QuestionnaireLanguageSelector'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getMessages } from 'next-intl/server'
+import { NextIntlClientProvider } from 'next-intl'
 
 export default async function ParticipantQuestionnairePage({
   params,
 }: {
-  params: Promise<{ token: string }>
+  params: Promise<{ token: string; locale: string }>
 }) {
-  const { token } = await params
-  const supabase = await createSSRClient()
+  const { token, locale } = await params
+  console.log('=== PAGE FUNCTION CALLED ===', token.substring(0, 20) + '...')
+
+  // Use admin client to bypass RLS for anonymous access
+  // Token has already been validated in proxy.ts
+  const adminClient = createAdminClient()
   const t = await getTranslations('questionnaire')
+  const messages = await getMessages()
 
   // Validate token
+  console.log('Step 1: Validating token...')
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: tokenValidation } = await (supabase as any).rpc(
+  const { data: tokenValidation } = await (adminClient as any).rpc(
     'validate_participant_token',
     {
       token_value: token,
     }
   )
 
+  console.log('Step 2: Token validation result:', tokenValidation)
+
   if (
     !tokenValidation ||
     tokenValidation.length === 0 ||
     !tokenValidation[0].is_valid
   ) {
+    console.log('Step 2a: Token invalid, redirecting')
     redirect('/invalid-token')
   }
 
   const tokenInfo = tokenValidation[0]
+  console.log('Step 3: Token info:', { isShared: tokenInfo.is_shared, participantId: tokenInfo.participant_id })
 
-  // Get questionnaire
-  const { data: questionnaireData } = await supabase
+  // Get questionnaire using admin client (bypasses RLS)
+  console.log('Step 4: Fetching questionnaire...')
+  const { data: questionnaireData } = await adminClient
     .from('questionnaires')
     .select('*')
     .eq('id', tokenInfo.questionnaire_id)
     .single()
 
   if (!questionnaireData) {
+    console.log('Step 4a: Questionnaire not found, redirecting')
     redirect('/invalid-token')
   }
 
   const questionnaire = questionnaireData as Tables<'questionnaires'>
+  console.log('Step 5: Questionnaire found')
 
-  // Get participant
-  const { data: participantData } = await supabase
-    .from('participants')
-    .select('*')
-    .eq('id', tokenInfo.participant_id)
-    .single()
-
-  if (!participantData) {
-    redirect('/invalid-token')
-  }
-
-  const participant = participantData as Tables<'participants'>
-
-  // Get organization
-  const { data: organizationData } = await supabase
+  // Get organization using admin client (bypasses RLS)
+  console.log('Step 6: Fetching organization...')
+  const { data: organizationData } = await adminClient
     .from('organizations')
     .select('*')
     .eq('id', tokenInfo.organization_id)
     .single()
 
   if (!organizationData) {
+    console.log('Step 6a: Organization not found, redirecting')
     redirect('/invalid-token')
   }
 
   const organization = organizationData as Tables<'organizations'>
+  console.log('Step 7: Organization found, about to handle participant')
 
-  // Check for existing response
-  const { data: existingResponseData } = await supabase
-    .from('questionnaire_responses')
-    .select('*')
-    .eq('questionnaire_id', tokenInfo.questionnaire_id)
-    .eq('participant_id', tokenInfo.participant_id)
-    .maybeSingle()
+  // Handle participant based on whether this is a shared token
+  let participant: Tables<'participants'>
+  let existingResponse: Tables<'questionnaire_responses'> | null = null
 
-  const existingResponse = existingResponseData ? (existingResponseData as Tables<'questionnaire_responses'>) : null
+  if (tokenInfo.is_shared) {
+    console.log('Handling shared token - creating new anonymous participant')
+    // For shared tokens, always create a new anonymous participant
+    // No cookies, no tracking - each visit is independent
+    const newParticipant = await createAnonymousParticipant(adminClient, organization.id, tokenInfo.questionnaire_id)
+    console.log('Created new participant:', newParticipant.id)
+    participant = newParticipant
+    // No existing response for a new participant
+    existingResponse = null
+  } else {
+    // For non-shared tokens, use the participant_id from the token
+    const { data: participantData } = await adminClient
+      .from('participants')
+      .select('*')
+      .eq('id', tokenInfo.participant_id)
+      .single()
+
+    if (!participantData) {
+      redirect('/invalid-token')
+    }
+
+    participant = participantData as Tables<'participants'>
+
+    // Check for existing response using admin client
+    const { data: existingResponseData } = await adminClient
+      .from('questionnaire_responses')
+      .select('*')
+      .eq('questionnaire_id', tokenInfo.questionnaire_id)
+      .eq('participant_id', tokenInfo.participant_id)
+      .maybeSingle()
+
+    existingResponse = existingResponseData ? (existingResponseData as Tables<'questionnaire_responses'>) : null
+  }
+
+  // Debug logging
+  console.log('Page validation:', {
+    hasQuestionnaire: !!questionnaire,
+    hasParticipant: !!participant,
+    hasOrganization: !!organization,
+    participantId: participant?.id,
+    isShared: tokenInfo.is_shared
+  })
 
   if (!questionnaire || !participant || !organization) {
+    console.log('Redirecting to /invalid-token - missing data')
     redirect('/invalid-token')
   }
 
@@ -99,8 +141,9 @@ export default async function ParticipantQuestionnairePage({
   const availableLanguages = questionnaire.available_languages || ['en'];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="bg-white shadow rounded-lg p-4 mb-4">
           <div className="flex items-start justify-between">
@@ -258,8 +301,34 @@ export default async function ParticipantQuestionnairePage({
           existingResponse={existingResponse}
           isWithinTimeFrame={isWithinTimeFrame}
         />
+        </div>
       </div>
-    </div>
+    </NextIntlClientProvider>
   )
 }
 
+/**
+ * Helper function to create an anonymous participant
+ */
+async function createAnonymousParticipant(
+  supabase: any,
+  organizationId: string,
+  questionnaireId: string
+): Promise<Tables<'participants'>> {
+  const { data: participant, error } = await supabase
+    .from('participants')
+    .insert({
+      organization_id: organizationId,
+      email: `anonymous-${Date.now()}-${Math.random().toString(36).substring(7)}@questionnaire.local`,
+      name: 'Anonymous Participant',
+      metadata: { type: 'anonymous', questionnaire_id: questionnaireId },
+    })
+    .select()
+    .single()
+
+  if (error || !participant) {
+    throw new Error('Failed to create participant')
+  }
+
+  return participant as Tables<'participants'>
+}

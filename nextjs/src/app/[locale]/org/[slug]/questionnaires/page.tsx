@@ -1,4 +1,5 @@
 import { createSSRClient } from '@/lib/supabase/server'
+import { getTranslations } from 'next-intl/server'
 import { Tables } from '@/lib/types'
 
 export default async function QuestionnairesPage({
@@ -7,6 +8,7 @@ export default async function QuestionnairesPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+  const t = await getTranslations('organization')
   const supabase = await createSSRClient()
 
   // Get organization
@@ -33,9 +35,9 @@ export default async function QuestionnairesPage({
     <div className="px-4 sm:px-0">
       <div className="sm:flex sm:items-center mb-6">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-bold text-gray-900">Questionnaires</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('questionnaires')}</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Manage questionnaires for {org.name}
+            {t('manageQuestionnaires', { org: org.name })}
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -43,7 +45,7 @@ export default async function QuestionnairesPage({
             disabled
             className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
           >
-            Create Questionnaire
+            {t('createQuestionnaire')}
           </button>
         </div>
       </div>
@@ -78,7 +80,7 @@ export default async function QuestionnairesPage({
                         {q.status}
                       </span>
                       <span className="text-xs text-gray-500">
-                        Created {new Date(q.created_at).toLocaleDateString()}
+                        {t('created')} {new Date(q.created_at).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -87,7 +89,7 @@ export default async function QuestionnairesPage({
                       disabled
                       className="text-sm text-blue-600 hover:text-blue-500 disabled:opacity-50"
                     >
-                      View
+                      {t('common.view')}
                     </button>
                   </div>
                 </div>
@@ -110,10 +112,10 @@ export default async function QuestionnairesPage({
               />
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">
-              No questionnaires
+              {t('noQuestionnaires')}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              Get started by creating a new questionnaire.
+              {t('getStartedQuestionnaires')}
             </p>
           </div>
         )}

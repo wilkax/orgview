@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Filter, Download, BarChart3, PieChart, TrendingUp } from 'lucide-react';
 import { Json } from '@/lib/types';
 import {
@@ -78,6 +79,7 @@ interface Props {
 }
 
 export function AnalyticsDashboardClient({ organization, questionnaires, approaches, slug }: Props) {
+  const t = useTranslations('analytics');
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<string>('');
   const [selectedSections, setSelectedSections] = useState<string[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
@@ -268,9 +270,9 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('title')}</h1>
         <p className="text-gray-600">
-          Filter and visualize questionnaire data, then export to PowerPoint
+          {t('description')}
         </p>
       </div>
 
@@ -278,21 +280,21 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
       <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
         <div className="flex items-center gap-2 mb-4">
           <Filter className="h-5 w-5 text-gray-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('filters')}</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Questionnaire Selector */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Questionnaire
+              {t('questionnaire')}
             </label>
             <select
               value={selectedQuestionnaire}
               onChange={(e) => setSelectedQuestionnaire(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             >
-              <option value="">Select a questionnaire</option>
+              <option value="">{t('selectQuestionnaire')}</option>
               {questionnaires.map((q) => (
                 <option key={q.id} value={q.id}>
                   {q.title} ({q.responseCount} responses)
@@ -305,7 +307,7 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
           {sections.length > 0 && (
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sections & Questions
+                {t('sectionsAndQuestions')}
               </label>
               <div className="flex gap-2 flex-wrap">
                 {sections.map((section) => (
@@ -332,7 +334,7 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
                             onClick={() => handleSectionToggle(section.id)}
                             className="text-xs text-blue-600 hover:text-blue-700"
                           >
-                            {selectedSections.includes(section.id) ? 'Deselect All' : 'Select All'}
+                            {selectedSections.includes(section.id) ? t('deselectAll') : t('selectAll')}
                           </button>
                         </div>
                         <div className="max-h-64 overflow-y-auto space-y-2">
@@ -364,7 +366,7 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
                   }}
                   className="px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
-                  {selectedSections.length === sections.length ? 'Clear All' : 'Select All'}
+                  {selectedSections.length === sections.length ? t('deselectAll') : t('selectAll')}
                 </button>
               </div>
             </div>
@@ -374,18 +376,18 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
           {aggregatedData && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sort By
+                {t('sortBy')}
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
-                <option value="none">Default Order</option>
-                <option value="average-desc">Average (High to Low)</option>
-                <option value="average-asc">Average (Low to High)</option>
-                <option value="median-desc">Median (High to Low)</option>
-                <option value="median-asc">Median (Low to High)</option>
+                <option value="none">{t('defaultOrder')}</option>
+                <option value="average-desc">{t('averageHighToLow')}</option>
+                <option value="average-asc">{t('averageLowToHigh')}</option>
+                <option value="median-desc">{t('medianHighToLow')}</option>
+                <option value="median-asc">{t('medianLowToHigh')}</option>
               </select>
             </div>
           )}
@@ -399,16 +401,16 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
                 onClick={handleSelectAllCharts}
                 className="px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
-                Select All
+                {t('selectAll')}
               </button>
               <button
                 onClick={handleDeselectAllCharts}
                 className="px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
-                Deselect All
+                {t('deselectAll')}
               </button>
               <span className="px-3 py-2 text-sm text-gray-600">
-                {selectedChartsForExport.length} chart{selectedChartsForExport.length !== 1 ? 's' : ''} selected
+                {t('chartsSelected', { count: selectedChartsForExport.length })}
               </span>
             </div>
             <button
@@ -417,7 +419,7 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               <Download className="h-4 w-4" />
-              Export to PowerPoint ({selectedChartsForExport.length})
+              {t('exportToPowerPoint', { count: selectedChartsForExport.length })}
             </button>
           </div>
         )}
@@ -428,23 +430,23 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
         {!selectedQuestionnaire ? (
           <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
             <BarChart3 className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Select a Questionnaire</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('selectQuestionnaire')}</h3>
             <p className="text-gray-500">
-              Choose a questionnaire from the filters to start visualizing data
+              {t('chooseQuestionnaireToVisualize')}
             </p>
           </div>
         ) : selectedQuestions.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
             <Filter className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Select Questions</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('selectQuestions')}</h3>
             <p className="text-gray-500">
-              Choose sections or questions to visualize their data
+              {t('chooseSectionsOrQuestions')}
             </p>
           </div>
         ) : loading ? (
           <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-500">Loading data...</p>
+            <p className="text-gray-500">{t('common.loading')}</p>
           </div>
         ) : aggregatedData ? (
           <div className="space-y-6">
@@ -453,21 +455,21 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <BarChart3 className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-sm font-medium text-gray-600">Questions</h3>
+                  <h3 className="text-sm font-medium text-gray-600">{t('questions')}</h3>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">{selectedQuestions.length}</p>
               </div>
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="h-5 w-5 text-green-600" />
-                  <h3 className="text-sm font-medium text-gray-600">Responses</h3>
+                  <h3 className="text-sm font-medium text-gray-600">{t('responses')}</h3>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">{aggregatedData.responseCount}</p>
               </div>
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <PieChart className="h-5 w-5 text-purple-600" />
-                  <h3 className="text-sm font-medium text-gray-600">Avg Score</h3>
+                  <h3 className="text-sm font-medium text-gray-600">{t('avgScore')}</h3>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">
                   {Object.values(aggregatedData.questions).length > 0
@@ -506,37 +508,37 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
                         className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                         title="Select for export"
                       />
-                      <label className="text-xs text-gray-600">Export</label>
+                      <label className="text-xs text-gray-600">{t('export')}</label>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Statistics */}
                     <div>
-                      <h4 className="text-sm font-medium text-gray-700 mb-3">Statistics</h4>
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">{t('statistics')}</h4>
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Average:</span>
+                          <span className="text-sm text-gray-600">{t('average')}</span>
                           <span className="text-sm font-semibold text-gray-900">{questionData.average}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Median:</span>
+                          <span className="text-sm text-gray-600">{t('median')}</span>
                           <span className="text-sm font-semibold text-gray-900">{questionData.median}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Range:</span>
+                          <span className="text-sm text-gray-600">{t('range')}</span>
                           <span className="text-sm font-semibold text-gray-900">
                             {questionData.min} - {questionData.max}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Responses:</span>
+                          <span className="text-sm text-gray-600">{t('responses')}</span>
                           <span className="text-sm font-semibold text-gray-900">{questionData.responseCount}</span>
                         </div>
                         {questionData.scale && (
                           <div className="mt-3 pt-3 border-t border-gray-200">
                             <div className="text-xs text-gray-500">
-                              Scale: {questionData.scale.min} ({questionData.scale.minLabel}) - {questionData.scale.max} ({questionData.scale.maxLabel})
+                              {t('scale')} {questionData.scale.min} ({questionData.scale.minLabel}) - {questionData.scale.max} ({questionData.scale.maxLabel})
                             </div>
                           </div>
                         )}
@@ -546,14 +548,14 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
                     {/* Distribution Chart */}
                     {Object.keys(questionData.distribution).length > 0 && (
                       <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-3">Distribution</h4>
+                        <h4 className="text-sm font-medium text-gray-700 mb-3">{t('distribution')}</h4>
                         <div className="h-64">
                           <Bar
                             data={{
                               labels: Object.keys(questionData.distribution).sort((a, b) => Number(a) - Number(b)),
                               datasets: [
                                 {
-                                  label: 'Response Count',
+                                  label: t('responseCount'),
                                   data: Object.keys(questionData.distribution)
                                     .sort((a, b) => Number(a) - Number(b))
                                     .map(key => questionData.distribution[key]),

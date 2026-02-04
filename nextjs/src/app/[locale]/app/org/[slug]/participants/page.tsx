@@ -1,4 +1,5 @@
 import { createSSRClient } from '@/lib/supabase/server'
+import { getTranslations } from 'next-intl/server'
 import { Tables } from '@/lib/types'
 
 export default async function ParticipantsPage({
@@ -7,6 +8,7 @@ export default async function ParticipantsPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+  const t = await getTranslations('organization')
   const supabase = await createSSRClient()
 
   // Get organization
@@ -33,9 +35,9 @@ export default async function ParticipantsPage({
     <div className="px-4 sm:px-0">
       <div className="sm:flex sm:items-center mb-6">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-bold text-gray-900">Participants</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('participants')}</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Manage participants for {org.name}
+            {t('manageParticipants', { org: org.name })}
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -43,7 +45,7 @@ export default async function ParticipantsPage({
             disabled
             className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
           >
-            Add Participant
+            {t('addParticipant')}
           </button>
         </div>
       </div>
@@ -57,22 +59,22 @@ export default async function ParticipantsPage({
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  Email
+                  {t('common.email')}
                 </th>
                 <th
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  Name
+                  {t('common.name')}
                 </th>
                 <th
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  Created
+                  {t('created')}
                 </th>
                 <th scope="col" className="relative px-6 py-3">
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">{t('common.actions')}</span>
                 </th>
               </tr>
             </thead>
@@ -97,7 +99,7 @@ export default async function ParticipantsPage({
                       disabled
                       className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
                     >
-                      View
+                      {t('common.view')}
                     </button>
                   </td>
                 </tr>
@@ -120,10 +122,10 @@ export default async function ParticipantsPage({
               />
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">
-              No participants
+              {t('noParticipants')}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              Get started by adding participants to your organization.
+              {t('getStartedParticipants')}
             </p>
           </div>
         )}

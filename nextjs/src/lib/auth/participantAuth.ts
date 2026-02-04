@@ -6,10 +6,12 @@ export interface ParticipantTokenInfo {
   participantId: string | null
   questionnaireId: string | null
   organizationId: string | null
+  isShared: boolean
 }
 
 /**
  * Validate a participant access token
+ * For shared tokens, participantId will be null
  */
 export async function validateParticipantToken(
   supabase: SupabaseClient<Database>,
@@ -25,6 +27,7 @@ export async function validateParticipantToken(
       participantId: null,
       questionnaireId: null,
       organizationId: null,
+      isShared: false,
     }
   }
 
@@ -35,6 +38,7 @@ export async function validateParticipantToken(
     participantId: tokenData.participant_id,
     questionnaireId: tokenData.questionnaire_id,
     organizationId: tokenData.organization_id,
+    isShared: tokenData.is_shared || false,
   }
 }
 
@@ -59,6 +63,7 @@ export async function markTokenAsUsed(
 
 /**
  * Get participant information by token
+ * Returns null for shared tokens (since they don't have a specific participant)
  */
 export async function getParticipantByToken(
   supabase: SupabaseClient<Database>,
@@ -67,7 +72,12 @@ export async function getParticipantByToken(
   // First validate the token
   const tokenInfo = await validateParticipantToken(supabase, token)
 
-  if (!tokenInfo.isValid || !tokenInfo.participantId) {
+  if (!tokenInfo.isValid) {
+    return null
+  }
+
+  // For shared tokens, there's no participant yet
+  if (tokenInfo.isShared || !tokenInfo.participantId) {
     return null
   }
 

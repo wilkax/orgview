@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { removeOrganizationMember } from '@/app/actions/invites'
+import { removeOrganizationMember } from '@/app/[locale]/actions/invites'
 import { Trash2, X } from 'lucide-react'
 
 interface RemoveMemberButtonProps {

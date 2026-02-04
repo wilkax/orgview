@@ -229,7 +229,7 @@ export type Database = {
       participant_access_tokens: {
         Row: {
           id: string
-          participant_id: string
+          participant_id: string | null
           questionnaire_id: string
           token: string
           expires_at: string | null
@@ -237,10 +237,11 @@ export type Database = {
           used_at: string | null
           created_at: string
           created_by: string | null
+          is_shared: boolean
         }
         Insert: {
           id?: string
-          participant_id: string
+          participant_id?: string | null
           questionnaire_id: string
           token: string
           expires_at?: string | null
@@ -248,10 +249,11 @@ export type Database = {
           used_at?: string | null
           created_at?: string
           created_by?: string | null
+          is_shared?: boolean
         }
         Update: {
           id?: string
-          participant_id?: string
+          participant_id?: string | null
           questionnaire_id?: string
           token?: string
           expires_at?: string | null
@@ -259,6 +261,7 @@ export type Database = {
           used_at?: string | null
           created_at?: string
           created_by?: string | null
+          is_shared?: boolean
         }
         Relationships: []
       }
@@ -515,9 +518,10 @@ export type Database = {
         }
         Returns: {
           is_valid: boolean
-          participant_id: string
+          participant_id: string | null
           questionnaire_id: string
           organization_id: string
+          is_shared: boolean
         }[]
       }
     }

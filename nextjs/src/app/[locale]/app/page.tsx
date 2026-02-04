@@ -4,9 +4,12 @@ import { useGlobal } from '@/lib/context/GlobalContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { CalendarDays, Settings, Building2 } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function DashboardContent() {
     const { loading, user } = useGlobal();
+    const t = useTranslations('app');
+    const tCommon = useTranslations('common');
 
     const getDaysSinceRegistration = () => {
         if (!user?.registered_at) return 0;
@@ -29,10 +32,10 @@ export default function DashboardContent() {
         <div className="space-y-6 p-6">
             <Card>
                 <CardHeader>
-                    <CardTitle>Welcome, {user?.email?.split('@')[0]}! 👋</CardTitle>
+                    <CardTitle>{t('welcome', { name: user?.email?.split('@')[0] || 'User' })} 👋</CardTitle>
                     <CardDescription className="flex items-center gap-2">
                         <CalendarDays className="h-4 w-4" />
-                        Member for {daysSinceRegistration} days
+                        {t('memberFor', { days: daysSinceRegistration })}
                     </CardDescription>
                 </CardHeader>
             </Card>
@@ -40,8 +43,8 @@ export default function DashboardContent() {
             {/* Quick Actions */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                    <CardDescription>Frequently used features</CardDescription>
+                    <CardTitle>{t('quickActions')}</CardTitle>
+                    <CardDescription>{t('quickActionsDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid gap-4 md:grid-cols-2">
@@ -55,8 +58,8 @@ export default function DashboardContent() {
                                     <Building2 className="h-4 w-4 text-blue-600" />
                                 </div>
                                 <div>
-                                    <h3 className="font-medium">Organizations</h3>
-                                    <p className="text-sm text-gray-500">Manage all organizations</p>
+                                    <h3 className="font-medium">{t('organizations')}</h3>
+                                    <p className="text-sm text-gray-500">{t('manageOrganizations')}</p>
                                 </div>
                             </Link>
                         )}

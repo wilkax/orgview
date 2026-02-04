@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { inviteOrganizationAuditor } from '@/app/actions/invites'
+import { inviteOrganizationAuditor } from '@/app/[locale]/actions/invites'
 import { UserPlus, X } from 'lucide-react'
 
 interface InviteAuditorFormProps {

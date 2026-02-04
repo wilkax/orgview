@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { createSPASassClient } from '@/lib/supabase/client'
 import { Tables } from '@/lib/types'
 import { Plus, Calendar, Users, Eye, Copy, Check } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
-import { generateAnonymousInviteLink, getQuestionnaireInviteLink } from '@/app/actions/questionnaires'
+import { generateAnonymousInviteLink, getQuestionnaireInviteLink } from '@/app/[locale]/actions/questionnaires'
 
 type Organization = Tables<'organizations'>
 type Questionnaire = Tables<'questionnaires'>
@@ -17,6 +18,7 @@ interface ApproachWithQuestionnaire extends Approach {
 }
 
 export default function QuestionnairesPage() {
+  const t = useTranslations('common')
   const params = useParams()
   const router = useRouter()
   const slug = params.slug as string
@@ -169,20 +171,20 @@ export default function QuestionnairesPage() {
   }
 
   if (loading) {
-    return <div className="p-6">Loading...</div>
+    return <div className="p-6">{t('loading')}</div>
   }
 
   if (!org) {
-    return <div className="p-6">Organization not found</div>
+    return <div className="p-6">{t('organizationNotFound')}</div>
   }
 
   return (
     <div className="px-4 sm:px-0">
       <div className="sm:flex sm:items-center mb-6">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-bold text-gray-900">Questionnaires</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('questionnaires')}</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Manage questionnaires for {org.name}
+            {t('manageQuestionnaires', { org: org.name })}
           </p>
         </div>
       </div>
@@ -190,7 +192,7 @@ export default function QuestionnairesPage() {
       {/* Available Approaches */}
       {approaches.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Available Approaches</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('availableApproaches')}</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {approaches.map((approach) => (
               <div key={approach.id} className="bg-white shadow rounded-lg p-6">
@@ -217,11 +219,11 @@ export default function QuestionnairesPage() {
                       }}
                       className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
                     >
-                      Create from this approach
+                      {t('createFromThisApproach')}
                     </button>
                   ) : (
                     <p className="text-sm text-gray-500 italic">
-                      No questionnaire available for this approach yet
+                      {t('noQuestionnaireAvailable')}
                     </p>
                   )}
                 </div>
@@ -235,16 +237,16 @@ export default function QuestionnairesPage() {
       {showCreateForm && selectedApproach && selectedApproach.questionnaire && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-medium mb-4">Create Questionnaire from Approach</h2>
+            <h2 className="text-lg font-medium mb-4">{t('createQuestionnaireFromApproach')}</h2>
             <p className="text-sm text-gray-600 mb-4">
-              Approach: <span className="font-medium">{selectedApproach.name}</span>
+              {t('approach')}: <span className="font-medium">{selectedApproach.name}</span>
             </p>
             <p className="text-sm text-gray-600 mb-4">
-              Questionnaire: <span className="font-medium">{selectedApproach.questionnaire.title}</span>
+              {t('questionnaire')}: <span className="font-medium">{selectedApproach.questionnaire.title}</span>
             </p>
             <form onSubmit={createQuestionnaire} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Title</label>
+                <label className="block text-sm font-medium text-gray-700">{t('title')}</label>
                 <input
                   type="text"
                   required
@@ -254,7 +256,7 @@ export default function QuestionnairesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <label className="block text-sm font-medium text-gray-700">{t('description')}</label>
                 <textarea
                   value={newQuestionnaire.description}
                   onChange={(e) => setNewQuestionnaire({ ...newQuestionnaire, description: e.target.value })}
@@ -271,12 +273,12 @@ export default function QuestionnairesPage() {
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label htmlFor="is_anonymous" className="ml-2 block text-sm text-gray-900">
-                  Anonymous responses
+                  {t('anonymousResponses')}
                 </label>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('startDate')}</label>
                   <input
                     type="date"
                     value={newQuestionnaire.start_date}
@@ -285,7 +287,7 @@ export default function QuestionnairesPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">End Date</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('endDate')}</label>
                   <input
                     type="date"
                     value={newQuestionnaire.end_date}
@@ -303,13 +305,13 @@ export default function QuestionnairesPage() {
                   }}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
                 >
-                  Create Questionnaire
+                  {t('createQuestionnaire')}
                 </button>
               </div>
             </form>
@@ -319,7 +321,7 @@ export default function QuestionnairesPage() {
 
       {/* Existing Questionnaires */}
       <div>
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Your Questionnaires</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">{t('yourQuestionnaires')}</h2>
         <div className="bg-white shadow rounded-lg overflow-hidden">
           {questionnaires.length > 0 ? (
             <ul className="divide-y divide-gray-200">
@@ -352,7 +354,7 @@ export default function QuestionnairesPage() {
                         {q.is_anonymous && (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                             <Users className="h-3 w-3" />
-                            Anonymous
+                            {t('anonymous')}
                           </span>
                         )}
                         {q.start_date && (
@@ -382,12 +384,12 @@ export default function QuestionnairesPage() {
                           {copiedLinkId === q.id ? (
                             <>
                               <Check className="h-4 w-4" />
-                              Copied!
+                              {t('copiedLink')}
                             </>
                           ) : (
                             <>
                               <Copy className="h-4 w-4" />
-                              Copy Link
+                              {t('copyLink')}
                             </>
                           )}
                         </button>
@@ -397,7 +399,7 @@ export default function QuestionnairesPage() {
                         className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
                       >
                         <Eye className="h-4 w-4" />
-                        View
+                        {t('view')}
                       </button>
                     </div>
                   </div>
@@ -408,12 +410,12 @@ export default function QuestionnairesPage() {
             <div className="text-center py-12">
               <Plus className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">
-                No questionnaires
+                {t('noQuestionnaires')}
               </h3>
               <p className="mt-1 text-sm text-gray-500">
                 {approaches.length > 0
-                  ? 'Select a template from the approaches above to create your first questionnaire.'
-                  : 'No approaches have been assigned to this organization yet.'}
+                  ? t('selectTemplate')
+                  : t('noApproachesAssigned')}
               </p>
             </div>
           )}
