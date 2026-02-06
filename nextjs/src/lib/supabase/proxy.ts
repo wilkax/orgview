@@ -94,6 +94,25 @@ export async function updateSession(request: NextRequest, response?: NextRespons
                     url.pathname = localeMatch ? `${localeMatch[0]}/app` : '/app'
                     return NextResponse.redirect(url)
                 }
+
+                // If user is an auditor (not system admin), restrict access to analytics only
+                if (!isSystemAdmin) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const { data: userRole } = await (supabase as any).rpc('get_user_org_role', { org_id: org.id })
+
+                    if (userRole === 'auditor') {
+                        // Allow access to analytics page
+                        if (!pathWithoutLocale.includes('/analytics')) {
+                            // Redirect to analytics page
+                            const url = request.nextUrl.clone()
+                            const localeMatch = pathname.match(/^\/(en|de)/)
+                            url.pathname = localeMatch
+                                ? `${localeMatch[0]}/app/org/${orgSlug}/analytics`
+                                : `/app/org/${orgSlug}/analytics`
+                            return NextResponse.redirect(url)
+                        }
+                    }
+                }
             }
         }
     }

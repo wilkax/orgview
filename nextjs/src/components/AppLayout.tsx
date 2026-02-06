@@ -81,13 +81,29 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     // Always add User Settings
     navigation.push({ name: t('userSettings'), href: '/app/user-settings', icon: User });
 
+    // Get user's role in the current organization
+    const getUserOrgRole = () => {
+        if (!currentOrgSlug || !user?.roles?.organizationMemberships) return null;
+        const membership = user.roles.organizationMemberships.find(
+            org => org.organizationSlug === currentOrgSlug
+        );
+        return membership?.role || null;
+    };
+
+    const userOrgRole = getUserOrgRole();
+
     // Build organization sub-navigation if on an org page
-    const orgSubNavigation = currentOrgSlug ? [
-        { name: t('dashboard'), href: `/app/org/${currentOrgSlug}` },
-        { name: t('questionnaires'), href: `/app/org/${currentOrgSlug}/questionnaires` },
-        { name: t('analytics'), href: `/app/org/${currentOrgSlug}/analytics` },
-        { name: t('participants'), href: `/app/org/${currentOrgSlug}/participants` },
-    ] : [];
+    // Auditors can only see Analytics, admins and system admins see everything
+    const orgSubNavigation = currentOrgSlug ? (
+        userOrgRole === 'auditor'
+            ? [{ name: t('analytics'), href: `/app/org/${currentOrgSlug}/analytics` }]
+            : [
+                { name: t('dashboard'), href: `/app/org/${currentOrgSlug}` },
+                { name: t('questionnaires'), href: `/app/org/${currentOrgSlug}/questionnaires` },
+                { name: t('analytics'), href: `/app/org/${currentOrgSlug}/analytics` },
+                { name: t('participants'), href: `/app/org/${currentOrgSlug}/participants` },
+            ]
+    ) : [];
 
     const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
