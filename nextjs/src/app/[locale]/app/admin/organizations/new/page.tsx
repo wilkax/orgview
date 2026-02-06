@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createSPASassClientAuthenticated } from '@/lib/supabase/client'
+import { generateUniqueSlugClient } from '@/lib/utils/slug-generator'
 
 export default function NewOrganizationPage() {
   const router = useRouter()
@@ -10,7 +11,6 @@ export default function NewOrganizationPage() {
   const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
-    slug: '',
     description: '',
   })
 
@@ -23,11 +23,14 @@ export default function NewOrganizationPage() {
       const supabaseWrapper = await createSPASassClientAuthenticated()
       const supabase = supabaseWrapper.getSupabaseClient()
 
+      // Auto-generate unique slug
+      const slug = generateUniqueSlugClient()
+
       const { error: insertError } = await supabase
         .from('organizations')
         .insert({
           name: formData.name,
-          slug: formData.slug,
+          slug: slug,
           description: formData.description || null,
         })
 
@@ -40,14 +43,6 @@ export default function NewOrganizationPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleSlugGenerate = () => {
-    const slug = formData.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-    setFormData({ ...formData, slug })
   }
 
   return (
@@ -87,42 +82,6 @@ export default function NewOrganizationPage() {
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               placeholder="Acme Corporation"
             />
-          </div>
-
-          <div>
-            <label
-              htmlFor="slug"
-              className="block text-sm font-medium text-gray-700"
-            >
-              URL Slug *
-            </label>
-            <div className="mt-1 flex rounded-md shadow-sm">
-              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                /org/
-              </span>
-              <input
-                type="text"
-                id="slug"
-                required
-                pattern="[a-z0-9\-]+"
-                value={formData.slug}
-                onChange={(e) =>
-                  setFormData({ ...formData, slug: e.target.value })
-                }
-                className="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                placeholder="acme-corp"
-              />
-            </div>
-            <p className="mt-1 text-sm text-gray-500">
-              Lowercase letters, numbers, and hyphens only.{' '}
-              <button
-                type="button"
-                onClick={handleSlugGenerate}
-                className="text-blue-600 hover:text-blue-500"
-              >
-                Generate from name
-              </button>
-            </p>
           </div>
 
           <div>

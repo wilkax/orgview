@@ -388,6 +388,7 @@
     "questions": "Fragen",
     "responses": "Antworten",
     "avgScore": "Durchschn. Punktzahl",
+    "questionTypes": "Fragetypen",
     "statistics": "Statistiken",
     "average": "Durchschnitt:",
     "median": "Median:",
@@ -396,7 +397,19 @@
     "distribution": "Verteilung",
     "responseCount": "Antwortanzahl",
     "export": "Exportieren",
-    "chartsSelected": "{count} Diagramm{count, plural, one {} other {e}} ausgewählt"
+    "chartsSelected": "{count} Diagramm{count, plural, one {} other {e}} ausgewählt",
+    "topAnswer": "Häufigste Antwort:",
+    "optionBreakdown": "Optionsaufschlüsselung",
+    "totalSelections": "Gesamtauswahl:",
+    "selectionCount": "Auswahlanzahl",
+    "timesSelected": "Mal ausgewählt",
+    "averageRanks": "Durchschnittliche Ränge (niedriger ist besser)",
+    "rankings": "Rangfolgen",
+    "averageRankChart": "Durchschnittlicher Rang",
+    "averageRank": "Durchschnittlicher Rang",
+    "lowerIsBetter": "Niedriger ist besser",
+    "textResponses": "Textantworten",
+    "noResponses": "Noch keine Antworten"
   }
 }
 

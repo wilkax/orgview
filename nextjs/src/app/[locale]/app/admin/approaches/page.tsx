@@ -6,6 +6,7 @@ import { createSPASassClient } from '@/lib/supabase/client'
 import { Tables } from '@/lib/types'
 import { Plus, FileText, Layers, X, Search } from 'lucide-react'
 import Link from 'next/link'
+import { generateUniqueSlugClient } from '@/lib/utils/slug-generator'
 
 type Approach = Tables<'approaches'>
 
@@ -17,7 +18,6 @@ export default function ApproachesPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newApproach, setNewApproach] = useState({
     name: '',
-    slug: '',
     description: '',
     categories: [] as string[],
   })
@@ -61,18 +61,21 @@ export default function ApproachesPage() {
     const supabaseWrapper = await createSPASassClient()
     const supabase = supabaseWrapper.getSupabaseClient()
 
+    // Auto-generate unique slug
+    const slug = generateUniqueSlugClient()
+
     const { error } = await supabase
       .from('approaches')
       .insert([{
         name: newApproach.name,
-        slug: newApproach.slug,
+        slug: slug,
         description: newApproach.description || null,
         category: newApproach.categories.length > 0 ? newApproach.categories : null,
       }])
 
     if (!error) {
       setShowCreateForm(false)
-      setNewApproach({ name: '', slug: '', description: '', categories: [] })
+      setNewApproach({ name: '', description: '', categories: [] })
       setCategoryInput('')
       loadApproaches()
     }
@@ -228,16 +231,6 @@ export default function ApproachesPage() {
                   required
                   value={newApproach.name}
                   onChange={(e) => setNewApproach({ ...newApproach, name: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">{c('slug')}</label>
-                <input
-                  type="text"
-                  required
-                  value={newApproach.slug}
-                  onChange={(e) => setNewApproach({ ...newApproach, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>

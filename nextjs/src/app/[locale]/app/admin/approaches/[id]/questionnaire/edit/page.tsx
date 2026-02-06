@@ -363,12 +363,14 @@ export default function QuestionnaireEditorPage() {
                   type="text"
                   value={section.title}
                   onChange={(e) => updateSection(sectionIndex, 'title', e.target.value)}
+                  onFocus={(e) => e.target.select()}
                   className="block w-full text-lg font-medium border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-0 px-0"
                   placeholder="Section title"
                 />
                 <textarea
                   value={section.description || ''}
                   onChange={(e) => updateSection(sectionIndex, 'description', e.target.value)}
+                  onFocus={(e) => e.target.select()}
                   className="block w-full text-sm border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-0 px-0"
                   placeholder="Section description (optional)"
                   rows={2}
@@ -395,6 +397,7 @@ export default function QuestionnaireEditorPage() {
                       <textarea
                         value={question.text}
                         onChange={(e) => updateQuestion(sectionIndex, questionIndex, 'text', e.target.value)}
+                        onFocus={(e) => e.target.select()}
                         className="block w-full text-sm border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
                         placeholder="Question text"
                         rows={2}
@@ -436,6 +439,7 @@ export default function QuestionnaireEditorPage() {
                               type="text"
                               value={question.scale.minLabel}
                               onChange={(e) => updateQuestion(sectionIndex, questionIndex, 'scale.minLabel', e.target.value)}
+                              onFocus={(e) => e.target.select()}
                               className="block w-full text-sm border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
                               placeholder="Min label"
                             />
@@ -448,6 +452,7 @@ export default function QuestionnaireEditorPage() {
                               type="text"
                               value={question.scale.maxLabel}
                               onChange={(e) => updateQuestion(sectionIndex, questionIndex, 'scale.maxLabel', e.target.value)}
+                              onFocus={(e) => e.target.select()}
                               className="block w-full text-sm border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
                               placeholder="Max label"
                             />
@@ -466,6 +471,7 @@ export default function QuestionnaireEditorPage() {
                                   type="text"
                                   value={option}
                                   onChange={(e) => updateOption(sectionIndex, questionIndex, optionIndex, e.target.value)}
+                                  onFocus={(e) => e.target.select()}
                                   className="flex-1 text-sm border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
                                   placeholder={`Option ${optionIndex + 1}`}
                                 />

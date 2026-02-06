@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { createSPASassClient } from '@/lib/supabase/client'
 import { Tables } from '@/lib/types'
-import { Plus, X, Layers } from 'lucide-react'
+import { X, Layers, Search } from 'lucide-react'
 
 type Approach = Tables<'approaches'>
 type OrganizationApproach = Tables<'organization_approaches'>
@@ -16,7 +16,23 @@ export default function OrganizationApproaches({ organizationId }: OrganizationA
   const [allApproaches, setAllApproaches] = useState<Approach[]>([])
   const [assignedApproaches, setAssignedApproaches] = useState<OrganizationApproach[]>([])
   const [loading, setLoading] = useState(true)
-  const [showAssignModal, setShowAssignModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showSearchResults, setShowSearchResults] = useState(false)
+  const searchContainerRef = useRef<HTMLDivElement>(null)
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   const loadData = useCallback(async () => {
     const supabaseWrapper = await createSPASassClient()
@@ -85,24 +101,92 @@ export default function OrganizationApproaches({ organizationId }: OrganizationA
   const assignedApproachDetails = allApproaches.filter(a => assignedApproachIds.includes(a.id))
   const availableApproaches = allApproaches.filter(a => !assignedApproachIds.includes(a.id))
 
+  // Filter available approaches based on search query
+  const filteredAvailableApproaches = availableApproaches.filter(approach => {
+    if (!searchQuery.trim()) return true
+    const query = searchQuery.toLowerCase()
+    return (
+      approach.name.toLowerCase().includes(query) ||
+      approach.description?.toLowerCase().includes(query) ||
+      approach.category?.toLowerCase().includes(query)
+    )
+  })
+
   if (loading) {
     return <div className="text-sm text-gray-500">Loading approaches...</div>
   }
 
   return (
     <div className="bg-white shadow rounded-lg">
-      <div className="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
-        <h3 className="text-lg leading-6 font-medium text-gray-900">
+      <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+        <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
           Assigned Approaches
         </h3>
+
+        {/* Search Input */}
         {availableApproaches.length > 0 && (
-          <button
-            onClick={() => setShowAssignModal(true)}
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700"
-          >
-            <Plus className="h-4 w-4" />
-            Assign Approach
-          </button>
+          <div className="relative" ref={searchContainerRef}>
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setShowSearchResults(true)
+                }}
+                onFocus={() => setShowSearchResults(true)}
+                placeholder="Search approaches to assign..."
+                className="block w-full rounded-md border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+              />
+            </div>
+
+            {/* Search Results Dropdown */}
+            {showSearchResults && searchQuery.trim() && (
+              <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-96 overflow-y-auto">
+                {filteredAvailableApproaches.length > 0 ? (
+                  <div className="py-1">
+                    {filteredAvailableApproaches.map((approach) => (
+                      <button
+                        key={approach.id}
+                        onClick={() => {
+                          assignApproach(approach.id)
+                          setSearchQuery('')
+                          setShowSearchResults(false)
+                        }}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="flex items-start gap-2">
+                          <Layers className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-900">{approach.name}</div>
+                            {approach.description && (
+                              <div className="text-sm text-gray-600 mt-1 line-clamp-2">
+                                {approach.description}
+                              </div>
+                            )}
+                            {approach.category && (
+                              <div className="mt-2">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                  {approach.category}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="px-4 py-3 text-sm text-gray-500">
+                    No approaches found matching &quot;{searchQuery}&quot;
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -145,49 +229,10 @@ export default function OrganizationApproaches({ organizationId }: OrganizationA
           </div>
         ) : (
           <p className="text-sm text-gray-500">
-            No approaches assigned yet. Assign approaches to enable questionnaire templates for this organization.
+            No approaches assigned yet. Use the search above to assign approaches and enable questionnaire templates for this organization.
           </p>
         )}
       </div>
-
-      {/* Assign Modal */}
-      {showAssignModal && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
-            <h2 className="text-lg font-medium mb-4">Assign Approach</h2>
-            <div className="space-y-2">
-              {availableApproaches.map((approach) => (
-                <button
-                  key={approach.id}
-                  onClick={() => {
-                    assignApproach(approach.id)
-                    setShowAssignModal(false)
-                  }}
-                  className="w-full text-left p-3 border rounded-lg hover:bg-gray-50"
-                >
-                  <div className="font-medium">{approach.name}</div>
-                  {approach.description && (
-                    <div className="text-sm text-gray-600 mt-1">{approach.description}</div>
-                  )}
-                  {approach.category && (
-                    <div className="mt-2">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                        {approach.category}
-                      </span>
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setShowAssignModal(false)}
-              className="mt-4 w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

@@ -65,6 +65,8 @@ interface Question {
     minLabel: string;
     maxLabel: string;
   };
+  options?: string[];
+  maxLength?: number;
 }
 
 interface QuestionnaireSchema {
@@ -470,15 +472,28 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <PieChart className="h-5 w-5 text-purple-600" />
-                  <h3 className="text-sm font-medium text-gray-600">{t('avgScore')}</h3>
+                  <h3 className="text-sm font-medium text-gray-600">
+                    {(() => {
+                      const scaleQuestions = Object.values(aggregatedData.questions).filter((q: any) => q.type === 'scale');
+                      return scaleQuestions.length > 0 ? t('avgScore') : t('questionTypes');
+                    })()}
+                  </h3>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">
-                  {Object.values(aggregatedData.questions).length > 0
-                    ? (
-                        Object.values(aggregatedData.questions).reduce((sum: number, q: any) => sum + q.average, 0)
-                        / Object.values(aggregatedData.questions).length
-                      ).toFixed(2)
-                    : '0.00'}
+                  {(() => {
+                    const scaleQuestions = Object.values(aggregatedData.questions).filter((q: any) => q.type === 'scale');
+                    if (scaleQuestions.length > 0) {
+                      const avg = scaleQuestions.reduce((sum: number, q: any) => sum + (q.average || 0), 0) / scaleQuestions.length;
+                      return avg.toFixed(2);
+                    } else {
+                      // Show count of question types
+                      const types = Object.values(aggregatedData.questions).reduce((acc: Record<string, number>, q: any) => {
+                        acc[q.type] = (acc[q.type] || 0) + 1;
+                        return acc;
+                      }, {});
+                      return Object.entries(types).map(([type, count]) => `${count} ${type}`).join(', ');
+                    }
+                  })()}
                 </p>
               </div>
             </div>
@@ -513,84 +528,356 @@ export function AnalyticsDashboardClient({ organization, questionnaires, approac
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Statistics */}
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-700 mb-3">{t('statistics')}</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">{t('average')}</span>
-                          <span className="text-sm font-semibold text-gray-900">{questionData.average}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">{t('median')}</span>
-                          <span className="text-sm font-semibold text-gray-900">{questionData.median}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">{t('range')}</span>
-                          <span className="text-sm font-semibold text-gray-900">
-                            {questionData.min} - {questionData.max}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">{t('responses')}</span>
-                          <span className="text-sm font-semibold text-gray-900">{questionData.responseCount}</span>
-                        </div>
-                        {questionData.scale && (
-                          <div className="mt-3 pt-3 border-t border-gray-200">
-                            <div className="text-xs text-gray-500">
-                              {t('scale')} {questionData.scale.min} ({questionData.scale.minLabel}) - {questionData.scale.max} ({questionData.scale.maxLabel})
-                            </div>
+                  {/* Type-specific rendering */}
+                  {questionData.type === 'scale' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Statistics */}
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-700 mb-3">{t('statistics')}</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">{t('average')}</span>
+                            <span className="text-sm font-semibold text-gray-900">{questionData.average}</span>
                           </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">{t('median')}</span>
+                            <span className="text-sm font-semibold text-gray-900">{questionData.median}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">{t('range')}</span>
+                            <span className="text-sm font-semibold text-gray-900">
+                              {questionData.min} - {questionData.max}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">{t('responses')}</span>
+                            <span className="text-sm font-semibold text-gray-900">{questionData.responseCount}</span>
+                          </div>
+                          {questionData.scale && (
+                            <div className="mt-3 pt-3 border-t border-gray-200">
+                              <div className="text-xs text-gray-500">
+                                {t('scale')} {questionData.scale.min} ({questionData.scale.minLabel}) - {questionData.scale.max} ({questionData.scale.maxLabel})
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Distribution Chart */}
+                      {Object.keys(questionData.distribution || {}).length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-700 mb-3">{t('distribution')}</h4>
+                          <div className="h-64">
+                            <Bar
+                              data={{
+                                labels: Object.keys(questionData.distribution).sort((a, b) => Number(a) - Number(b)),
+                                datasets: [
+                                  {
+                                    label: t('responseCount'),
+                                    data: Object.keys(questionData.distribution)
+                                      .sort((a, b) => Number(a) - Number(b))
+                                      .map(key => questionData.distribution[key]),
+                                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                                    borderColor: 'rgb(59, 130, 246)',
+                                    borderWidth: 1
+                                  }
+                                ]
+                              }}
+                              options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                  legend: {
+                                    display: false
+                                  },
+                                  title: {
+                                    display: false
+                                  }
+                                },
+                                scales: {
+                                  y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                      stepSize: 1
+                                    }
+                                  }
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {questionData.type === 'single-choice' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Statistics */}
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-700 mb-3">{t('statistics')}</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">{t('responses')}</span>
+                            <span className="text-sm font-semibold text-gray-900">{questionData.responseCount}</span>
+                          </div>
+                          {questionData.topAnswer && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">{t('topAnswer')}</span>
+                              <span className="text-sm font-semibold text-gray-900">{questionData.topAnswer}</span>
+                            </div>
+                          )}
+                        </div>
+                        {/* Option breakdown */}
+                        <div className="mt-4">
+                          <h5 className="text-xs font-medium text-gray-600 mb-2">{t('optionBreakdown')}</h5>
+                          <div className="space-y-1">
+                            {(questionData.options || []).map((option: string) => {
+                              const count = questionData.distribution?.[option] || 0;
+                              const percentage = questionData.responseCount > 0
+                                ? Math.round((count / questionData.responseCount) * 100)
+                                : 0;
+                              return (
+                                <div key={option} className="text-xs text-gray-600">
+                                  <span className="font-medium">{option}:</span> {count} ({percentage}%)
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Distribution Chart */}
+                      {(questionData.options?.length > 0 || Object.keys(questionData.distribution || {}).length > 0) && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-700 mb-3">{t('distribution')}</h4>
+                          <div className="h-32">
+                            <Bar
+                              data={{
+                                labels: questionData.options && questionData.options.length > 0
+                                  ? questionData.options
+                                  : Object.keys(questionData.distribution || {}),
+                                datasets: [
+                                  {
+                                    label: t('responseCount'),
+                                    data: (questionData.options && questionData.options.length > 0
+                                      ? questionData.options
+                                      : Object.keys(questionData.distribution || {})
+                                    ).map((option: string) => questionData.distribution?.[option] || 0),
+                                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                                    borderColor: 'rgb(59, 130, 246)',
+                                    borderWidth: 1
+                                  }
+                                ]
+                              }}
+                              options={{
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                  legend: {
+                                    display: false
+                                  }
+                                },
+                                scales: {
+                                  x: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                      stepSize: 1
+                                    }
+                                  }
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {questionData.type === 'multiple-choice' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Statistics */}
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-700 mb-3">{t('statistics')}</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">{t('responses')}</span>
+                            <span className="text-sm font-semibold text-gray-900">{questionData.responseCount}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">{t('totalSelections')}</span>
+                            <span className="text-sm font-semibold text-gray-900">{questionData.totalSelections}</span>
+                          </div>
+                        </div>
+                        {/* Option breakdown */}
+                        <div className="mt-4">
+                          <h5 className="text-xs font-medium text-gray-600 mb-2">{t('optionBreakdown')}</h5>
+                          <div className="space-y-1">
+                            {(questionData.options || []).map((option: string) => {
+                              const count = questionData.distribution?.[option] || 0;
+                              const percentage = questionData.responseCount > 0
+                                ? Math.round((count / questionData.responseCount) * 100)
+                                : 0;
+                              return (
+                                <div key={option} className="text-xs text-gray-600">
+                                  <span className="font-medium">{option}:</span> {count} ({percentage}%)
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Distribution Chart */}
+                      {Object.keys(questionData.distribution || {}).length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-700 mb-3">{t('selectionCount')}</h4>
+                          <div className="h-64">
+                            <Bar
+                              data={{
+                                labels: questionData.options || Object.keys(questionData.distribution),
+                                datasets: [
+                                  {
+                                    label: t('timesSelected'),
+                                    data: (questionData.options || Object.keys(questionData.distribution)).map(
+                                      (option: string) => questionData.distribution[option] || 0
+                                    ),
+                                    backgroundColor: 'rgba(16, 185, 129, 0.5)',
+                                    borderColor: 'rgb(16, 185, 129)',
+                                    borderWidth: 1
+                                  }
+                                ]
+                              }}
+                              options={{
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                  legend: {
+                                    display: false
+                                  }
+                                },
+                                scales: {
+                                  x: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                      stepSize: 1
+                                    }
+                                  }
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {questionData.type === 'ranking' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Statistics */}
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-700 mb-3">{t('statistics')}</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">{t('responses')}</span>
+                            <span className="text-sm font-semibold text-gray-900">{questionData.responseCount}</span>
+                          </div>
+                        </div>
+                        {/* Average ranks */}
+                        <div className="mt-4">
+                          <h5 className="text-xs font-medium text-gray-600 mb-2">{t('averageRanks')}</h5>
+                          <div className="space-y-1">
+                            {(questionData.options || [])
+                              .map((option: string) => ({
+                                option,
+                                avgRank: questionData.averageRanks?.[option] || 0,
+                                count: questionData.rankCounts?.[option] || 0
+                              }))
+                              .sort((a, b) => a.avgRank - b.avgRank)
+                              .map(({ option, avgRank, count }) => (
+                                <div key={option} className="text-xs text-gray-600">
+                                  <span className="font-medium">{option}:</span> {avgRank > 0 ? avgRank.toFixed(2) : 'N/A'} ({count} {t('rankings')})
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Average Rank Chart */}
+                      {Object.keys(questionData.averageRanks || {}).length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-700 mb-3">{t('averageRankChart')}</h4>
+                          <div className="h-64">
+                            <Bar
+                              data={{
+                                labels: (questionData.options || [])
+                                  .map((option: string) => ({
+                                    option,
+                                    avgRank: questionData.averageRanks?.[option] || 999
+                                  }))
+                                  .sort((a, b) => a.avgRank - b.avgRank)
+                                  .map(({ option }) => option),
+                                datasets: [
+                                  {
+                                    label: t('averageRank'),
+                                    data: (questionData.options || [])
+                                      .map((option: string) => ({
+                                        option,
+                                        avgRank: questionData.averageRanks?.[option] || 999
+                                      }))
+                                      .sort((a, b) => a.avgRank - b.avgRank)
+                                      .map(({ avgRank }) => avgRank === 999 ? 0 : avgRank),
+                                    backgroundColor: 'rgba(139, 92, 246, 0.5)',
+                                    borderColor: 'rgb(139, 92, 246)',
+                                    borderWidth: 1
+                                  }
+                                ]
+                              }}
+                              options={{
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                  legend: {
+                                    display: false
+                                  }
+                                },
+                                scales: {
+                                  x: {
+                                    beginAtZero: true,
+                                    reverse: false,
+                                    title: {
+                                      display: true,
+                                      text: t('lowerIsBetter')
+                                    }
+                                  }
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {questionData.type === 'free-text' && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">
+                        {t('textResponses')} ({questionData.responseCount})
+                      </h4>
+                      <div className="max-h-96 overflow-y-auto space-y-2">
+                        {(questionData.responses || []).map((response: string, index: number) => (
+                          <div key={index} className="p-3 bg-gray-50 border border-gray-200 rounded text-sm text-gray-700">
+                            {response}
+                          </div>
+                        ))}
+                        {(!questionData.responses || questionData.responses.length === 0) && (
+                          <p className="text-sm text-gray-500 italic">{t('noResponses')}</p>
                         )}
                       </div>
                     </div>
-
-                    {/* Distribution Chart */}
-                    {Object.keys(questionData.distribution).length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-3">{t('distribution')}</h4>
-                        <div className="h-64">
-                          <Bar
-                            data={{
-                              labels: Object.keys(questionData.distribution).sort((a, b) => Number(a) - Number(b)),
-                              datasets: [
-                                {
-                                  label: t('responseCount'),
-                                  data: Object.keys(questionData.distribution)
-                                    .sort((a, b) => Number(a) - Number(b))
-                                    .map(key => questionData.distribution[key]),
-                                  backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                                  borderColor: 'rgb(59, 130, 246)',
-                                  borderWidth: 1
-                                }
-                              ]
-                            }}
-                            options={{
-                              responsive: true,
-                              maintainAspectRatio: false,
-                              plugins: {
-                                legend: {
-                                  display: false
-                                },
-                                title: {
-                                  display: false
-                                }
-                              },
-                              scales: {
-                                y: {
-                                  beginAtZero: true,
-                                  ticks: {
-                                    stepSize: 1
-                                  }
-                                }
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
               ))}
             </div>
