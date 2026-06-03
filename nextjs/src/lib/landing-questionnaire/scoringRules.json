@@ -1,0 +1,152 @@
+{
+  "dimensions": {
+    "decision_logic": {
+      "label": "Entscheidungslogik"
+    },
+    "contradiction_handling": {
+      "label": "Umgang mit Widerspruch"
+    },
+    "learning_under_uncertainty": {
+      "label": "Lernen unter Unsicherheit"
+    },
+    "transparency": {
+      "label": "Transparenz & Kontext"
+    },
+    "transformation_focus": {
+      "label": "Transformationsfokus"
+    }
+  },
+  "question_scoring": {
+    "q1": {
+      "decision_logic": {
+        "1": 1,
+        "2": 2,
+        "3": 3,
+        "4": 4,
+        "5": 5
+      }
+    },
+    "q2": {
+      "contradiction_handling": {
+        "1": 1,
+        "2": 2,
+        "3": 3,
+        "4": 4,
+        "5": 5
+      }
+    },
+    "q3": {
+      "learning_under_uncertainty": {
+        "1": 1,
+        "2": 2,
+        "3": 3,
+        "4": 4,
+        "5": 5
+      }
+    },
+    "q4": {
+      "transparency": {
+        "1": 1,
+        "2": 2,
+        "3": 3,
+        "4": 4,
+        "5": 5
+      }
+    },
+    "q5": {
+      "A": {
+        "transformation_focus": 2,
+        "pattern": "technology_process_focus"
+      },
+      "B": {
+        "transformation_focus": 3,
+        "pattern": "governance_focus"
+      },
+      "C": {
+        "transformation_focus": 2,
+        "pattern": "efficiency_focus"
+      },
+      "D": {
+        "transformation_focus": 5,
+        "pattern": "collaboration_sensemaking_focus"
+      },
+      "E": {
+        "transformation_focus": 1,
+        "pattern": "inconsistent_transformation_logic"
+      }
+    }
+  },
+  "score_levels": {
+    "low": {
+      "min": 1,
+      "max": 2
+    },
+    "medium": {
+      "min": 3,
+      "max": 3
+    },
+    "high": {
+      "min": 4,
+      "max": 5
+    }
+  },
+  "overall_classification": [
+    {
+      "min": 1.0,
+      "max": 2.2,
+      "label": "stabilitätsorientiert"
+    },
+    {
+      "min": 2.3,
+      "max": 3.4,
+      "label": "ambivalent / im Übergang"
+    },
+    {
+      "min": 3.5,
+      "max": 4.3,
+      "label": "entwicklungsorientiert"
+    },
+    {
+      "min": 4.4,
+      "max": 5.0,
+      "label": "adaptiv / stark lernorientiert"
+    }
+  ],
+  "tension_rules": [
+    {
+      "id": "t1",
+      "conditions": {
+        "transparency_min": 4,
+        "decision_logic_max": 2
+      },
+      "message": "Transparenz ist vorhanden, aber Entscheidungsbefugnis bleibt stark zentralisiert."
+    },
+    {
+      "id": "t2",
+      "conditions": {
+        "transformation_patterns": [
+          "technology_process_focus",
+          "efficiency_focus"
+        ],
+        "learning_under_uncertainty_max": 2
+      },
+      "message": "Transformation wird stark technisch oder effizienzorientiert gedacht, während Lernen unter Unsicherheit schwach ausgeprägt ist."
+    },
+    {
+      "id": "t3",
+      "conditions": {
+        "learning_under_uncertainty_min": 4,
+        "contradiction_handling_max": 2
+      },
+      "message": "Die Organisation möchte iterativ lernen, verarbeitet Widerspruch aber noch nicht produktiv."
+    },
+    {
+      "id": "t4",
+      "conditions": {
+        "all_scores_equal": 3
+      },
+      "message": "Das Profil wirkt uneinheitlich. Wahrscheinlich unterscheiden sich gelebte Praktiken stark nach Bereich, Führungskraft oder Situation."
+    }
+  ]
+}
+

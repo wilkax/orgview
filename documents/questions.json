@@ -1,0 +1,85 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "dimension": "decision_logic",
+      "type": "scale",
+      "question": "Wie werden wichtige Entscheidungen in Ihrer Organisation typischerweise getroffen?",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "überwiegend durch einzelne Führungskräfte",
+          "2": "nach mehreren Abstimmungsrunden",
+          "3": "situativ unterschiedlich",
+          "4": "weitgehend gemeinsam und transparent",
+          "5": "dezentral dort, wo die größte Kompetenz liegt"
+        }
+      }
+    },
+    {
+      "id": "q2",
+      "dimension": "contradiction_handling",
+      "type": "scale",
+      "question": "Was passiert typischerweise, wenn jemand eine etablierte Entscheidung offen infrage stellt?",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "das wird eher kritisch gesehen",
+          "2": "es wird toleriert, aber selten aktiv aufgegriffen",
+          "3": "hängt stark von Person und Situation ab",
+          "4": "Gegenperspektiven werden bewusst einbezogen",
+          "5": "Widerspruch gilt als wichtiger Beitrag zur Entscheidungsqualität"
+        }
+      }
+    },
+    {
+      "id": "q3",
+      "dimension": "learning_under_uncertainty",
+      "type": "scale",
+      "question": "Wie geht Ihre Organisation mit Entscheidungen um, deren Ausgang nicht sicher vorhersehbar ist?",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "Entscheidungen werden möglichst lange abgesichert",
+          "2": "Risiken werden stark eskaliert",
+          "3": "es gibt keine klare Logik",
+          "4": "Entscheidungen werden bewusst iterativ getroffen",
+          "5": "Entscheidungen werden als überprüfbare Hypothesen verstanden"
+        }
+      }
+    },
+    {
+      "id": "q4",
+      "dimension": "transparency",
+      "type": "scale",
+      "question": "Wie leicht ist es für Mitarbeitende, die Hintergründe wichtiger Entscheidungen nachzuvollziehen?",
+      "scale": {
+        "min": 1,
+        "max": 5,
+        "labels": {
+          "1": "kaum nachvollziehbar",
+          "2": "nur für bestimmte Rollen sichtbar",
+          "3": "teilweise transparent",
+          "4": "meist nachvollziehbar",
+          "5": "Entscheidungen und Annahmen werden aktiv erklärt"
+        }
+      }
+    },
+    {
+      "id": "q5",
+      "dimension": "transformation_focus",
+      "type": "single_choice",
+      "question": "Wenn neue Technologien oder Veränderungen eingeführt werden, worauf liegt der Schwerpunkt typischerweise zuerst?",
+      "options": {
+        "A": "Technische Einführung und Prozesse",
+        "B": "Rollen, Zuständigkeiten und Governance",
+        "C": "Effizienzsteigerung im Tagesgeschäft",
+        "D": "Gemeinsames Verständnis und Zusammenarbeit",
+        "E": "Das ist sehr unterschiedlich"
+      }
+    }
+  ]
+}

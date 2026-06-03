@@ -1,7 +1,7 @@
 import React from 'react';
-import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import AuthAwareButtons from '@/components/AuthAwareButtons';
+import QuestionnaireDialog from '@/components/QuestionnaireDialog';
 import { getTranslations } from 'next-intl/server';
 
 export default async function Home() {
@@ -51,9 +51,7 @@ export default async function Home() {
             </p>
 
             <div className="mt-12">
-              <p className="text-xl md:text-2xl font-semibold text-primary-600 animate-pulse">
-                {t('stayTuned')}
-              </p>
+              <QuestionnaireDialog />
             </div>
           </div>
         </section>

@@ -1,0 +1,35 @@
+{
+  "headlines": {
+    "stabilitätsorientiert": "Ihre Organisation wirkt stabil, aber nur begrenzt adaptiv.",
+    "ambivalent / im Übergang": "Ihre Organisation zeigt erste adaptive Muster, operiert aber noch uneinheitlich.",
+    "entwicklungsorientiert": "Ihre Organisation zeigt eine ausgeprägte Lern- und Entwicklungsorientierung.",
+    "adaptiv / stark lernorientiert": "Ihre Organisation wirkt stark lernorientiert und adaptiv im Umgang mit Unsicherheit."
+  },
+  "summaries": {
+    "stabilitätsorientiert": "Entscheidungen werden eher abgesichert und über bestehende Rollen sowie Strukturen gesteuert. Das schafft Stabilität, kann unter Unsicherheit jedoch zu Verzögerungen führen.",
+    "ambivalent / im Übergang": "In Ihrer Organisation existieren sowohl klassische Steuerungslogiken als auch erste adaptive Praktiken. Die tatsächliche Arbeitsweise scheint stark vom jeweiligen Kontext abhängig zu sein.",
+    "entwicklungsorientiert": "Ihre Organisation scheint Entscheidungen zunehmend iterativ und lernorientiert zu gestalten. Transparenz, Beteiligung und Reflexion spielen dabei bereits eine wichtige Rolle.",
+    "adaptiv / stark lernorientiert": "Ihre Organisation zeigt viele Merkmale einer adaptiven und lernfähigen Arbeitsweise. Entscheidungen werden offenbar stark kontextbezogen, transparent und entwicklungsorientiert getroffen."
+  },
+  "strength_texts": {
+    "decision_logic_high": "Entscheidungen scheinen vergleichsweise nah an Kompetenz und Kontext getroffen zu werden.",
+    "contradiction_handling_high": "Widerspruch scheint nicht primär als Störung, sondern als Beitrag zur Entscheidungsqualität verstanden zu werden.",
+    "learning_under_uncertainty_high": "Unsicherheit wird offenbar nicht nur abgesichert, sondern aktiv als Lernfeld genutzt.",
+    "transparency_high": "Wichtige Entscheidungen und deren Hintergründe scheinen vergleichsweise nachvollziehbar zu sein.",
+    "transformation_focus_high": "Transformation wird offenbar nicht nur technisch, sondern auch kulturell und organisatorisch verstanden."
+  },
+  "development_texts": {
+    "decision_logic_low": "Entscheidungen scheinen stark zentralisiert oder absicherungsorientiert getroffen zu werden.",
+    "contradiction_handling_low": "Offener Widerspruch scheint nur begrenzt produktiv verarbeitet zu werden.",
+    "learning_under_uncertainty_low": "Unsicherheit wird offenbar eher vermieden oder eskaliert als iterativ bearbeitet.",
+    "transparency_low": "Entscheidungszusammenhänge scheinen nur eingeschränkt sichtbar zu sein.",
+    "transformation_focus_low": "Transformation scheint aktuell primär technisch oder operativ verstanden zu werden."
+  },
+  "recommendations": {
+    "stabilitätsorientiert": "Ein sinnvoller nächster Schritt könnte sein, Entscheidungsannahmen expliziter zu machen und kleine iterative Lernschleifen im Alltag zu etablieren.",
+    "ambivalent / im Übergang": "Hilfreich wäre jetzt vor allem mehr Konsistenz im Umgang mit Unsicherheit und bereichsübergreifender Zusammenarbeit.",
+    "entwicklungsorientiert": "Der nächste Entwicklungsschritt könnte darin liegen, adaptive Praktiken stärker organisationsweit anschlussfähig zu machen.",
+    "adaptiv / stark lernorientiert": "Die Herausforderung dürfte weniger in neuen Methoden liegen als darin, die bestehende Adaptionsfähigkeit unter wachsender Komplexität stabil zu halten."
+  }
+}
+
