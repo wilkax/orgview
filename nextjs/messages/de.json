@@ -196,7 +196,27 @@
     "noQuestionnaires": "Noch keine Fragebögen",
     "status": "Status",
     "createdAt": "Erstellt am",
-    "unknown": "Unbekannt"
+    "unknown": "Unbekannt",
+    "participants": "Teilnehmer",
+    "manageParticipants": "Verwalten Sie Teilnehmer für {org}",
+    "addParticipant": "Teilnehmer hinzufügen",
+    "created": "Erstellt",
+    "noParticipants": "Keine Teilnehmer",
+    "getStartedParticipants": "Beginnen Sie, indem Sie Teilnehmer zu Ihrer Organisation hinzufügen.",
+    "searchPlaceholder": "Nach Name oder E-Mail suchen…",
+    "filterByQuestionnaire": "Nach Fragebogen filtern",
+    "allQuestionnaires": "Alle Fragebögen",
+    "filterByStatus": "Nach Status filtern",
+    "allStatuses": "Alle",
+    "statusResponded": "Teilgenommen",
+    "statusNotResponded": "Nicht teilgenommen",
+    "noResults": "Keine Teilnehmer entsprechen Ihren Filtern",
+    "common": {
+      "email": "E-Mail",
+      "name": "Name",
+      "actions": "Aktionen",
+      "view": "Ansicht"
+    }
   },
   "errors": {
     "generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",

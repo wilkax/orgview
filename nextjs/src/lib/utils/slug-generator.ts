@@ -35,7 +35,7 @@ export function generateUniqueSlugClient(length: number = 12): string {
   // Combine timestamp with random data
   const timestamp = Date.now().toString()
   const randomArray = new Uint8Array(8)
-  crypto.getRandomValues(randomArray)
+  globalThis.crypto.getRandomValues(randomArray)
   const randomHex = Array.from(randomArray)
     .map(b => b.toString(16).padStart(2, '0'))
     .join('')
@@ -55,7 +55,7 @@ export function generateUniqueSlugClient(length: number = 12): string {
   const hexHash = Math.abs(hash).toString(16).padStart(8, '0')
   
   // Add more randomness to ensure uniqueness
-  const additionalRandom = Array.from(crypto.getRandomValues(new Uint8Array(4)))
+  const additionalRandom = Array.from(globalThis.crypto.getRandomValues(new Uint8Array(4)))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('')
   

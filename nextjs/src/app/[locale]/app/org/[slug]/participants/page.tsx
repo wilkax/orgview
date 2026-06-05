@@ -1,6 +1,8 @@
 import { createSSRClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getTranslations } from 'next-intl/server'
 import { Tables } from '@/lib/types'
+import ParticipantsFilterTable, { ParticipantRow, QuestionnaireOption } from '@/components/ParticipantsFilterTable'
 
 export default async function ParticipantsPage({
   params,
@@ -22,14 +24,78 @@ export default async function ParticipantsPage({
 
   const org = orgData as Tables<'organizations'>
 
-  // Get participants
-  const { data: participantsData } = await supabase
-    .from('participants')
-    .select('*')
-    .eq('organization_id', org.id)
-    .order('created_at', { ascending: false })
+  const adminClient = createAdminClient()
+
+  // Fetch participants, questionnaires, access tokens, and responses in parallel
+  const [
+    { data: participantsData },
+    { data: questionnairesData },
+  ] = await Promise.all([
+    supabase
+      .from('participants')
+      .select('*')
+      .eq('organization_id', org.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('questionnaires')
+      .select('id, title')
+      .eq('organization_id', org.id)
+      .order('created_at', { ascending: false }),
+  ])
 
   const participants = (participantsData || []) as Tables<'participants'>[]
+  const questionnaires: QuestionnaireOption[] = (questionnairesData || []) as QuestionnaireOption[]
+
+  // Build sets of responded participants and participant→questionnaire map
+  const respondedSet = new Set<string>()
+  const participantQuestionnaireMap = new Map<string, string[]>()
+
+  if (participants.length > 0) {
+    const participantIds = participants.map((p) => p.id)
+
+    // questionnaire_responses is the source of truth: it has both participant_id and
+    // questionnaire_id for every submission, regardless of whether the participant used
+    // a shared or individual access token.
+    const { data: responsesData } = await adminClient
+      .from('questionnaire_responses')
+      .select('participant_id, questionnaire_id')
+      .in('participant_id', participantIds)
+
+    for (const r of responsesData || []) {
+      respondedSet.add(r.participant_id)
+
+      const existing = participantQuestionnaireMap.get(r.participant_id) ?? []
+      if (!existing.includes(r.questionnaire_id)) {
+        existing.push(r.questionnaire_id)
+      }
+      participantQuestionnaireMap.set(r.participant_id, existing)
+    }
+  }
+
+  const participantRows: ParticipantRow[] = participants.map((p) => ({
+    id: p.id,
+    email: p.email,
+    name: p.name ?? null,
+    created_at: p.created_at,
+    questionnaireIds: participantQuestionnaireMap.get(p.id) ?? [],
+    hasResponded: respondedSet.has(p.id),
+  }))
+
+  const labels = {
+    searchPlaceholder: t('searchPlaceholder'),
+    filterByQuestionnaire: t('filterByQuestionnaire'),
+    allQuestionnaires: t('allQuestionnaires'),
+    filterByStatus: t('filterByStatus'),
+    allStatuses: t('allStatuses'),
+    statusResponded: t('statusResponded'),
+    statusNotResponded: t('statusNotResponded'),
+    noResults: t('noResults'),
+    email: t('common.email'),
+    name: t('common.name'),
+    created: t('created'),
+    actions: t('common.actions'),
+    view: t('common.view'),
+  }
 
   return (
     <div className="px-4 sm:px-0">
@@ -50,62 +116,14 @@ export default async function ParticipantsPage({
         </div>
       </div>
 
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        {participants && participants.length > 0 ? (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  {t('common.email')}
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  {t('common.name')}
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  {t('created')}
-                </th>
-                <th scope="col" className="relative px-6 py-3">
-                  <span className="sr-only">{t('common.actions')}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {participants.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {p.email}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {p.name || '-'}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(p.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      disabled
-                      className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
-                    >
-                      {t('common.view')}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="bg-white shadow rounded-lg overflow-hidden p-4">
+        {participants.length > 0 ? (
+          <ParticipantsFilterTable
+            participants={participantRows}
+            questionnaires={questionnaires}
+            slug={slug}
+            labels={labels}
+          />
         ) : (
           <div className="text-center py-12">
             <svg

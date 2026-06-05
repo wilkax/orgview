@@ -196,7 +196,27 @@
     "noQuestionnaires": "No questionnaires yet",
     "status": "Status",
     "createdAt": "Created at",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "participants": "Participants",
+    "manageParticipants": "Manage participants for {org}",
+    "addParticipant": "Add Participant",
+    "created": "Created",
+    "noParticipants": "No participants",
+    "getStartedParticipants": "Get started by adding participants to your organization.",
+    "searchPlaceholder": "Search by name or email…",
+    "filterByQuestionnaire": "Filter by questionnaire",
+    "allQuestionnaires": "All questionnaires",
+    "filterByStatus": "Filter by status",
+    "allStatuses": "All",
+    "statusResponded": "Responded",
+    "statusNotResponded": "Not responded",
+    "noResults": "No participants match your filters",
+    "common": {
+      "email": "Email",
+      "name": "Name",
+      "actions": "Actions",
+      "view": "View"
+    }
   },
   "errors": {
     "generic": "An error occurred. Please try again.",
